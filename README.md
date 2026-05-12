@@ -7,7 +7,7 @@
 | Course |  |
 | Class |  |
 | Semester | SU26 |
-| Group |  |
+| Group | 07 |
 | Topic |  |
 | Repository |  |
 
@@ -17,11 +17,11 @@
 
 | No | Student ID | Full Name | GitHub Username | Role | Main Responsibility |
 |---:|---|---|---|---|---|
-| 1 |  |  |  | Leader |  |
-| 2 |  |  |  | Member |  |
-| 3 |  |  |  | Member |  |
-| 4 |  |  |  | Member |  |
-| 5 |  |  |  | Member |  |
+| 1 | DE201129 | Kiều Đình Đức |  | Leader |  |
+| 2 | DE190387 |  Huỳnh Thị Thùy Trang| Thuy-Chang | Member |  |
+| 3 | DE191015 | Đào Hoàng Ân |  | Member |  |
+| 4 |DE190390  |Ngô Vương Tùng  |  | Member |  |
+| 5 |DE200146  |Trần Quốc   |  | Member |  |
 
 ---
 
