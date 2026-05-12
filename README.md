@@ -21,7 +21,7 @@
 | 2 | DE190387 |  Huỳnh Thị Thùy Trang| Thuy-Chang | Member |  |
 | 3 | DE191015 | Đào Hoàng Ân |  | Member |  |
 | 4 |DE190390  |Ngô Vương Tùng  |  | Member |  |
-| 5 |DE200146  |Trần Quốc   |  | Member |  |
+| 5 |DE200146  |Trần Quốc Huy |  | Member |  |
 
 ---
 
