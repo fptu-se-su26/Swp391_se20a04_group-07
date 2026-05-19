@@ -8,7 +8,7 @@
 | Class | SE20A04 |
 | Semester | SU26 |
 | Group | 07 |
-| Topic |  |
+| Topic | School Bus Management System |
 | Repository |  |
 
 ---
