@@ -1,5 +1,6 @@
 package dao;
 
+import dao.DBContext;
 import model.Class;
 import java.sql.*;
 import java.util.ArrayList;

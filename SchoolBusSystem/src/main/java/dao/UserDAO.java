@@ -1,5 +1,6 @@
 package dao;
 
+import dao.DBContext;
 import model.User;
 import java.sql.*;
 
