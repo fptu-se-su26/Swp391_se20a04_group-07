@@ -1,0 +1,226 @@
+<div id="erd" style="padding: 8px 0;"></div>
+<style>
+#erd svg { max-width: 100%; }
+#erd svg text,
+#erd svg .label,
+#erd svg .entityLabel,
+#erd svg tspan,
+#erd svg .attributeBoxEven text,
+#erd svg .attributeBoxOdd text,
+#erd svg g.label text,
+#erd svg .row-odd text,
+#erd svg .row-even text,
+#erd svg foreignObject div {
+  fill: #000000 !important;
+  color: #000000 !important;
+}
+</style>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: 'sans-serif',
+  themeVariables: {
+    darkMode: false,
+    fontSize: '12px',
+    fontFamily: 'sans-serif',
+    lineColor: '#73726c',
+    textColor: '#000000',
+    primaryColor: '#f1efea',
+    primaryBorderColor: '#b4b2a9',
+    primaryTextColor: '#000000',
+    secondaryColor: '#e8e6e0',
+    secondaryTextColor: '#000000',
+    tertiaryColor: '#dbd9d3',
+    tertiaryTextColor: '#000000',
+    attributeBackgroundColorEven: '#eceae3',
+    attributeBackgroundColorOdd: '#f5f4f0',
+    attributeTextColor: '#000000',
+    edgeLabelBackground: '#ffffff',
+    nodeTextColor: '#000000',
+  },
+});
+
+const diagram = `erDiagram
+  roles {
+    int role_id PK
+    nvarchar role_name
+  }
+  users {
+    int user_id PK
+    nvarchar full_name
+    nvarchar email
+    nvarchar password
+    nvarchar phone
+    int role_id FK
+    bit status
+    datetime created_at
+  }
+  parent_areas {
+    int area_id PK
+    nvarchar area_name
+    nvarchar description
+  }
+  parents {
+    int parent_id PK
+    int user_id FK
+    nvarchar address
+    int area_id FK
+    datetime created_at
+  }
+  drivers {
+    int driver_id PK
+    int user_id FK
+    nvarchar license_number
+    int experience_years
+    int area_id FK
+    int vehicle_id FK
+    nvarchar full_name
+    int birth_year
+  }
+  vehicles {
+    int vehicle_id PK
+    nvarchar license_plate
+    nvarchar vehicle_name
+    int seat_capacity
+    nvarchar color
+    bit status
+    datetime created_at
+  }
+  classes {
+    int class_id PK
+    nvarchar class_name
+    int grade_level
+    nvarchar academic_year
+    nvarchar teacher_name
+    bit status
+  }
+  students {
+    int student_id PK
+    int parent_id FK
+    nvarchar full_name
+    nvarchar gender
+    date date_of_birth
+    int class_id FK
+    bit status
+    datetime created_at
+  }
+  routes {
+    int route_id PK
+    nvarchar route_name
+    nvarchar start_location
+    nvarchar end_location
+    time pickup_time
+    time dropoff_time
+    int driver_id FK
+    int area_id FK
+    bit status
+  }
+  route_stops {
+    int stop_id PK
+    int route_id FK
+    nvarchar stop_name
+    int stop_order
+    time estimated_time
+  }
+  trips {
+    int trip_id PK
+    int route_id FK
+    int vehicle_id FK
+    int driver_id FK
+    date trip_date
+    nvarchar trip_type
+    nvarchar status
+  }
+  attendance {
+    int attendance_id PK
+    int trip_id FK
+    int student_id FK
+    datetime checkin_time
+    datetime checkout_time
+    nvarchar attendance_status
+    nvarchar note
+  }
+  leave_requests {
+    int leave_request_id PK
+    int student_id FK
+    int parent_id FK
+    date leave_date
+    nvarchar reason
+    nvarchar status
+  }
+  notifications {
+    int notification_id PK
+    int user_id FK
+    nvarchar title
+    nvarchar message
+    bit is_read
+    nvarchar notification_type
+    datetime created_at
+  }
+  feedbacks {
+    int feedback_id PK
+    int user_id FK
+    nvarchar subject
+    nvarchar content
+    datetime created_at
+  }
+
+  roles ||--o{ users : "has role"
+  users ||--o| parents : "is parent"
+  users ||--o| drivers : "is driver"
+  users ||--o{ notifications : "receives"
+  users ||--o{ feedbacks : "sends"
+  parent_areas ||--o{ parents : "belongs to"
+  parent_areas ||--o{ drivers : "covers"
+  parent_areas ||--o{ routes : "serves"
+  parents ||--o{ students : "has child"
+  parents ||--o{ leave_requests : "submits"
+  drivers ||--o{ routes : "drives"
+  drivers ||--o{ trips : "operates"
+  vehicles ||--o{ drivers : "assigned to"
+  vehicles ||--o{ trips : "used in"
+  classes ||--o{ students : "contains"
+  students ||--o{ attendance : "recorded in"
+  students ||--o{ leave_requests : "requests leave"
+  routes ||--o{ route_stops : "has stops"
+  routes ||--o{ trips : "scheduled as"
+  trips ||--o{ attendance : "has attendance"
+`;
+
+const { svg } = await mermaid.render('erd-svg', diagram);
+document.getElementById('erd').innerHTML = svg;
+
+document.querySelectorAll('#erd svg .node').forEach(node => {
+  const firstPath = node.querySelector('path[d]');
+  if (!firstPath) return;
+  const d = firstPath.getAttribute('d');
+  const nums = d.match(/-?[\d.]+/g)?.map(Number);
+  if (!nums || nums.length < 8) return;
+  const xs = [nums[0], nums[2], nums[4], nums[6]];
+  const ys = [nums[1], nums[3], nums[5], nums[7]];
+  const x = Math.min(...xs), y = Math.min(...ys);
+  const w = Math.max(...xs) - x, h = Math.max(...ys) - y;
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', x); rect.setAttribute('y', y);
+  rect.setAttribute('width', w); rect.setAttribute('height', h);
+  rect.setAttribute('rx', '8');
+  for (const a of ['fill', 'stroke', 'stroke-width', 'class', 'style']) {
+    if (firstPath.hasAttribute(a)) rect.setAttribute(a, firstPath.getAttribute(a));
+  }
+  firstPath.replaceWith(rect);
+});
+
+document.querySelectorAll('#erd svg .row-rect-odd path, #erd svg .row-rect-even path').forEach(p => {
+  p.setAttribute('stroke', 'none');
+});
+
+// Force tất cả text sang đen sau khi render
+document.querySelectorAll('#erd svg text, #erd svg tspan').forEach(t => {
+  t.setAttribute('fill', '#000000');
+  t.style.fill = '#000000';
+  t.style.color = '#000000';
+});
+</script>
