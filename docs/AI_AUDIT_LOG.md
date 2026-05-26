@@ -5,14 +5,14 @@
 | Thông tin | Nội dung |
 |---|---|
 | Môn học | Software development project |
-| Mã môn học | SWp391 |
+| Mã môn học | SWP391 |
 | Lớp | SE20A04 |
 | Học kỳ | SU26 |
 | Tên bài tập / Project | School Bus System |
 | Tên sinh viên / Nhóm | Group 7 |
-| MSSV / Danh sách MSSV |  |
+| MSSV / Danh sách MSSV | DE201129 - DE200146 - DE191015 - DE190387 - DE190390 |
 | Giảng viên hướng dẫn | Lê Thiện Nhật Quang |
-| Ngày bắt đầu |  |
+| Ngày bắt đầu | 19/05/2026 |
 | Ngày hoàn thành |  |
 
 ---
