@@ -68,48 +68,33 @@ Viết tại đây...
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích sử dụng |  |
-| Phần việc liên quan | Requirement / Design / Database / Frontend / Backend / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỗ trợ ý tưởng / Hỗ trợ một phần / Hỗ trợ nhiều / Sinh chính nội dung |
+| Ngày sử dụng | 20/5/2026 |
+| Công cụ AI | ChatGPT |
+| Mục đích sử dụng |Hỗ trợ phân tích yêu cầu hệ thống  |
+| Phần việc liên quan | Requirement / Database / Frontend / Backend |
+| Mức độ sử dụng | Hỗ trợ ý tưởng |
 
 #### 4.1. Prompt đã sử dụng
 
-```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
-```
+Tôi đang phụ trách module Parent trong hệ thống quản lý xe buýt trường học bằng Java Servlet/JSP. 
+Hãy phân tích các chức năng cần có cho phụ huynh, bao gồm: xem danh sách con, theo dõi con, nhận thông báo từ admin, gửi feedback và xin nghỉ học.
+Hãy gợi ý luồng hoạt động và các file Servlet, DAO, JSP cần xây dựng.
 
 #### 4.2. Kết quả AI gợi ý
-
-Tóm tắt nội dung AI đã trả lời hoặc gợi ý.
-
-```text
-Viết tại đây...
-```
+AI gợi ý các chức năng chính của Parent như dashboard, profile, tracking, notification, feedback và leave request. AI cũng gợi ý chia chức năng theo Servlet, DAO và JSP để dễ triển khai.
 
 #### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
-
-Mô tả rõ phần nào được sử dụng lại từ gợi ý của AI.
-
-```text
-Viết tại đây...
-```
-
+Tôi sử dụng gợi ý để xác định phạm vi module Parent và lên danh sách các file cần làm như ParentDashboardServlet, ParentProfileServlet, NotificationServlet, FeedbackServlet, StudentTrackingServlet.
 #### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
 
-Mô tả sinh viên/nhóm đã thay đổi, kiểm tra, sửa lỗi hoặc cải tiến gì so với gợi ý ban đầu của AI.
-
-```text
-Viết tại đây...
-```
+Tôi tự điều chỉnh lại chức năng theo database thật của project, kiểm tra lại quan hệ giữa parents, students, users, đồng thời tự viết và sửa code Servlet/DAO cho phù hợp.
 
 #### 4.5. Minh chứng
 
 | Loại minh chứng | Nội dung |
 |---|---|
 | Link commit |  |
-| File liên quan |  |
+| File liên quan | |
 | Screenshot |  |
 | Kết quả chạy/test |  |
 | Link video demo |  |
