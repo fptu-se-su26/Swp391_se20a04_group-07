@@ -4,14 +4,14 @@
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học |  |
-| Mã môn học |  |
-| Lớp |  |
-| Học kỳ |  |
-| Tên bài tập / Project |  |
-| Tên sinh viên / Nhóm |  |
+| Môn học | Software development project |
+| Mã môn học | SWP391 |
+| Lớp | SE20A04 |
+| Học kỳ | SU25 |
+| Tên bài tập / Project | School Bus System |
+| Tên sinh viên / Nhóm | Group 7 |
 | MSSV / Danh sách MSSV |  |
-| Giảng viên hướng dẫn |  |
+| Giảng viên hướng dẫn | 	Lê Thiện Nhật Quang |
 | Ngày bắt đầu |  |
 | Ngày cập nhật gần nhất |  |
 
