@@ -75,33 +75,47 @@ Sinh viên/nhóm cần ghi lại:
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích |  |
+| Ngày sử dụng | 19/05/2026 |
+| Công cụ AI | ChatGPT |
+| Mục đích | Phân Chia Nhiệm Vụ |
 | Phần việc liên quan | Requirement / Design / Database / Coding / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỏi ý tưởng / Hỏi giải thích / Hỏi review / Hỏi debug / Hỏi sinh code / Hỏi tối ưu |
+| Mức độ sử dụng | Hỏi ý tưởng |
 
 #### 5.1. Prompt nguyên văn
 
-```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
-```
+Với đề tài “School Bus System”, hãy giúp tôi phân chia công việc cho 5 thành viên trong nhóm theo hướng phù hợp với cấu trúc source code Java Web MVC hiện tại và đảm bảo mỗi thành viên có phần việc rõ ràng, cân bằng và liên kết với nhau.
 
+Yêu cầu:
+Hãy chia công việc chi tiết cho từng thành viên ( 5 thành viên ) dựa trên source code và module hiện có.
+Mỗi thành viên cần có:module phụ trách,chức năng chính,các file servlet,các file DAO,JSP liên quan,nhiệm vụ backend/frontend/database,phần kiểm thử,phần tích hợp hệ thống.
+
+HãyPhân chia phải hợp lý, tránh trùng lặp công việc.
+Các phần việc cần liên kết đúng với mô hình MVC của project.
+Ưu tiên chia theo module thực tế của hệ thống.
+Viết theo phong cách báo cáo đồ án tốt nghiệp/chuyên nghiệp.
+Mô tả rõ trách nhiệm của từng người trong nhóm.
+Có thể bổ sung phần phối hợp giữa các thành viên nếu cần.
 #### 5.2. Bối cảnh khi viết prompt
 
-Mô tả ngắn gọn vì sao sinh viên/nhóm cần dùng prompt này.
-
-```text
-Viết tại đây...
-```
+Nhóm cần sử dụng prompt này để hỗ trợ phân chia công việc cho từng thành viên trong quá trình thực hiện đồ án “School Bus System”. Prompt giúp xác định rõ trách nhiệm của từng người dựa trên cấu trúc source code và các module hiện có của hệ thống, từ đó thuận tiện cho việc phát triển, quản lý tiến độ và viết báo cáo đồ án.
 
 #### 5.3. Kết quả AI trả về
 
-Tóm tắt nội dung AI đã trả lời hoặc gợi ý.
+AI đã phân tích cấu trúc project School Bus System và đề xuất phân chia công việc cho 5 thành viên theo từng module cụ thể của hệ thống.
 
-```text
-Viết tại đây...
-```
+Kết quả phân chia gồm:
+- Ngô Vương Tùng:
+phụ trách login/logout,Google Login,session,phân quyền,DBContext,
+model và bảo mật hệ thống.
+- Kiều Đình Đức:
+phụ trách Driver Module, quản lý tài xế, chuyến đi, điểm danh học sinh, cập nhật trạng thái xe,
+theo dõi học sinh trên chuyến đi.
+- Huỳnh Thị Thùy Trang:
+phụ trách Parent Module, dashboard phụ huynh, notification, feedback, profile phụ huynh, theo dõi học sinh, đơn xin nghỉ.
+- Đào Hoàng Ân:
+phụ trách Admin Module, quản lý tài khoản, quản lý phụ huynh, gửi thông báo, dashboard thống kê, duyệt đơn nghỉ, quản lý hệ thống.
+- Trần Quốc Huy:
+phụ trách Student Module, quản lý học sinh, danh sách lớp, liên kết phụ huynh, quản lý dữ liệu học sinh, tracking học sinh.
 
 #### 5.4. Kết quả đã áp dụng vào bài
 
