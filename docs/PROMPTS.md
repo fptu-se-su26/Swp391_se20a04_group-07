@@ -10,9 +10,9 @@
 | Học kỳ | SU25 |
 | Tên bài tập / Project | School Bus System |
 | Tên sinh viên / Nhóm | Group 7 |
-| MSSV / Danh sách MSSV |  |
+| MSSV / Danh sách MSSV | DE201129 - DE200146 - DE191015 - DE190387 - DE190390 |
 | Giảng viên hướng dẫn | 	Lê Thiện Nhật Quang |
-| Ngày bắt đầu |  |
+| Ngày bắt đầu | 19/05/2026 |
 | Ngày cập nhật gần nhất |  |
 
 ---
