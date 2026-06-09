@@ -16,7 +16,7 @@ public class DBContext {
                        + "encrypt=false;"
                        + "sendStringParametersAsUnicode=true;"; // ✅ Fix tiếng Việt
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            return DriverManager.getConnection(url, "sa", "Thuytrang2302@");
+            return DriverManager.getConnection(url, "sa", "sa");
         } catch (ClassNotFoundException | SQLException ex) {
             ex.printStackTrace();
             return null;

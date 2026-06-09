@@ -16,6 +16,8 @@ public class Student {
     private boolean status;
     private String parentName;
     private String studentCode;
+    private int userId;
+    private String areaName;
 
     // Trường bổ trợ để hiển thị tên lớp trên giao diện Admin (Giữ nguyên không xóa)
     private String classNameDisplay;
@@ -23,11 +25,15 @@ public class Student {
     // --- TRƯỜNG BỔ SUNG ĐỂ SỬA LỖI CHO DASHBOARD PHỤ HUYNH ---
     private String className;
 
+    // [ĐỒNG BỘ MỚI]: Hai thuộc tính lưu số điện thoại phụ huynh
+    private String parentPhone;
+    private String emergencyPhone;
+
     // 1. Constructor rỗng
     public Student() {
     }
 
-    // 2. Constructor đầy đủ (Giữ nguyên y hệt để không làm lỗi Admin)
+    // 2. Constructor đầy đủ (Giữ nguyên cấu trúc ban đầu của hệ thống)
     public Student(int studentId, int parentId, int classId, String fullName, String gender,
             Date dateOfBirth, String schoolName, String address, String avatar, boolean status) {
         this.studentId = studentId;
@@ -42,7 +48,7 @@ public class Student {
         this.status = status;
     }
 
-    // 3. Getter và Setter cho TOÀN BỘ các trường
+    // --- HỆ THỐNG GETTER & SETTER CHUẨN ĐÃ ĐƯỢC ĐỒNG BỘ ---
     public int getStudentId() {
         return studentId;
     }
@@ -131,7 +137,6 @@ public class Student {
         this.classNameDisplay = classNameDisplay;
     }
 
-    // --- GETTER & SETTER CHO TRƯỜNG VỪA BỔ SUNG ---
     public String getClassName() {
         return className;
     }
@@ -154,5 +159,39 @@ public class Student {
 
     public void setStudentCode(String studentCode) {
         this.studentCode = studentCode;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    // [FIX LỖI]: Getter & Setter chuẩn hóa cho thuộc tính parentPhone
+    public String getParentPhone() {
+        return parentPhone;
+    }
+
+    public void setParentPhone(String parentPhone) {
+        this.parentPhone = parentPhone;
+    }
+
+    // [FIX LỖI]: Getter & Setter chuẩn hóa cho thuộc tính emergencyPhone
+    public String getEmergencyPhone() {
+        return emergencyPhone;
+    }
+
+    public void setEmergencyPhone(String emergencyPhone) {
+        this.emergencyPhone = emergencyPhone;
+    }
+
+    public String getAreaName() {
+        return areaName;
+    }
+
+    public void setAreaName(String areaName) {
+        this.areaName = areaName;
     }
 }
