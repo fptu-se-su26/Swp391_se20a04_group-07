@@ -52,27 +52,29 @@ Gợi ý:
 
 Đánh dấu các công cụ AI đã sử dụng.
 
-- [ ] ChatGPT
+- [x] ChatGPT
 - [ ] Gemini
-- [ ] Claude
+- [x] Claude
 - [ ] GitHub Copilot
 - [ ] Cursor
 - [ ] Antigravity
 - [ ] Microsoft Copilot
 - [ ] Perplexity
-- [ ] Công cụ khác: ....................................
+- [x] Công cụ khác: Canva
 
 ### Công cụ được sử dụng nhiều nhất
 
 ```text
 Viết tại đây...
 ```
+ChatGPT
 
 ### Lý do sử dụng công cụ đó
 
 ```text
 Viết tại đây...
 ```
+Chat GPT hỗ trợ học thuật nhiều hơn so với các công cụ AI khác
 
 ---
 
@@ -80,20 +82,20 @@ Viết tại đây...
 
 Đánh dấu các nội dung phù hợp.
 
-- [ ] Hiểu yêu cầu đề bài
-- [ ] Phân tích bài toán
+- [x] Hiểu yêu cầu đề bài
+- [x] Phân tích bài toán
 - [ ] Tìm ý tưởng giải pháp
-- [ ] Thiết kế database
-- [ ] Thiết kế giao diện
+- [x] Thiết kế database
+- [x] Thiết kế giao diện
 - [ ] Thiết kế kiến trúc hệ thống
-- [ ] Viết code mẫu
+- [x] Viết code mẫu
 - [ ] Debug lỗi
-- [ ] Viết test case
+- [x] Viết test case
 - [ ] Review code
 - [ ] Tối ưu code
-- [ ] Kiểm tra bảo mật
-- [ ] Viết báo cáo
-- [ ] Chuẩn bị thuyết trình
+- [x] Kiểm tra bảo mật
+- [x] Viết báo cáo
+- [x] Chuẩn bị thuyết trình
 - [ ] Tìm hiểu công nghệ mới
 - [ ] Khác: ....................................
 
@@ -112,15 +114,10 @@ Viết tại đây...
 ```text
 Viết tại đây...
 ```
-
-Gợi ý:
-
 - Hiểu bài nhanh hơn.
 - Có thêm ví dụ minh họa.
 - Biết cách debug lỗi.
-- Biết thêm cách tổ chức code.
 - Biết thêm cách thiết kế giải pháp.
-- Biết cách viết test case.
 - Biết cách cải thiện báo cáo hoặc slide.
 
 ### 6.2. Những điểm AI chưa giúp tốt hoặc gây khó khăn
@@ -128,21 +125,14 @@ Gợi ý:
 ```text
 Viết tại đây...
 ```
-
-Gợi ý:
-
-- AI trả lời sai.
 - AI sinh code không chạy.
 - AI hiểu sai yêu cầu đề bài.
 - AI đưa giải pháp quá phức tạp.
-- AI thiếu ngữ cảnh môn học.
-- AI trả lời chung chung.
-- AI khiến em/nhóm dễ phụ thuộc.
 
 ### 6.3. Em/nhóm có bị phụ thuộc vào AI không?
 
 - [ ] Không phụ thuộc
-- [ ] Phụ thuộc ít
+- [x] Phụ thuộc ít
 - [ ] Phụ thuộc trung bình
 - [ ] Phụ thuộc nhiều
 
@@ -158,16 +148,16 @@ Viết tại đây...
 
 Đánh dấu các cách đã sử dụng.
 
-- [ ] Chạy thử chương trình
-- [ ] Kiểm tra output
+- [x] Chạy thử chương trình
+- [x] Kiểm tra output
 - [ ] Viết test case
-- [ ] So sánh với yêu cầu đề bài
-- [ ] Đối chiếu với tài liệu môn học
+- [x] So sánh với yêu cầu đề bài
+- [x] Đối chiếu với tài liệu môn học
 - [ ] Review code
-- [ ] Hỏi lại giảng viên
+- [x] Hỏi lại giảng viên
 - [ ] Tra cứu tài liệu chính thống
-- [ ] Thảo luận với thành viên nhóm
-- [ ] Kiểm tra bằng dữ liệu mẫu
+- [x] Thảo luận với thành viên nhóm
+- [x] Kiểm tra bằng dữ liệu mẫu
 - [ ] So sánh trước và sau khi dùng AI
 - [ ] Khác: ....................................
 
@@ -216,14 +206,9 @@ Mô tả rõ phần nào là đóng góp chính của sinh viên/nhóm, không p
 Viết tại đây...
 ```
 
-Gợi ý:
-
-- Tự phân tích yêu cầu.
-- Tự chọn giải pháp.
 - Tự chỉnh sửa code.
 - Tự kiểm tra output.
 - Tự thiết kế logic.
-- Tự sửa lỗi.
 - Tự viết báo cáo theo hiểu biết của mình.
 - Tự đánh giá ưu/nhược điểm của sản phẩm.
 - Tự thuyết trình và giải thích sản phẩm.
@@ -251,9 +236,6 @@ Sau bài tập/project này, em/nhóm học được gì về kiến thức môn
 ```text
 Viết tại đây...
 ```
-
-Gợi ý:
-
 - Kiến thức kỹ thuật đã hiểu rõ hơn.
 - Kỹ năng lập trình đã cải thiện.
 - Cách thiết kế hệ thống.
@@ -262,7 +244,6 @@ Gợi ý:
 - Cách làm việc nhóm.
 - Cách giải quyết lỗi.
 - Cách trình bày sản phẩm.
-- Cách đọc và hiểu tài liệu kỹ thuật.
 
 ---
 
@@ -273,10 +254,6 @@ Sau bài tập/project này, em/nhóm học được gì về việc sử dụng
 ```text
 Viết tại đây...
 ```
-
-Gợi ý:
-
-- Không nên copy nguyên kết quả AI.
 - Cần kiểm tra lại mọi kết quả AI.
 - Cần hiểu nội dung trước khi nộp.
 - Cần ghi nhận việc sử dụng AI.
@@ -290,12 +267,12 @@ Gợi ý:
 
 Đánh dấu các cam kết phù hợp.
 
-- [ ] Không dùng AI để làm toàn bộ bài mà không hiểu nội dung.
-- [ ] Không nộp nguyên văn kết quả AI nếu chưa kiểm tra.
-- [ ] Không che giấu việc sử dụng AI trong các phần quan trọng.
-- [ ] Không dùng AI để tạo nội dung sai lệch hoặc gian lận.
-- [ ] Không dùng AI thay thế hoàn toàn quá trình học.
-- [ ] Không bỏ qua yêu cầu, rubric hoặc hướng dẫn của giảng viên.
+- [x] Không dùng AI để làm toàn bộ bài mà không hiểu nội dung.
+- [x] Không nộp nguyên văn kết quả AI nếu chưa kiểm tra.
+- [x] Không che giấu việc sử dụng AI trong các phần quan trọng.
+- [x] Không dùng AI để tạo nội dung sai lệch hoặc gian lận.
+- [x] Không dùng AI thay thế hoàn toàn quá trình học.
+- [x] Không bỏ qua yêu cầu, rubric hoặc hướng dẫn của giảng viên.
 
 ### Giải thích thêm nếu có
 
@@ -312,9 +289,6 @@ Lần sau em/nhóm sẽ sử dụng AI tốt hơn bằng cách nào?
 ```text
 Viết tại đây...
 ```
-
-Gợi ý:
-
 - Viết prompt rõ hơn.
 - Cung cấp nhiều ngữ cảnh hơn cho AI.
 - Không hỏi AI làm toàn bộ bài.
@@ -386,4 +360,4 @@ Sinh viên/nhóm hiểu rằng:
 
 | Đại diện sinh viên/nhóm | Ngày xác nhận |
 |---|---|
-|  |  |
+| Trần Quốc Huy |06/09/2026  |
