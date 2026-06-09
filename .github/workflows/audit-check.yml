@@ -1,0 +1,31 @@
+name: AI Audit Log Check
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  check-required-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check required documentation files
+        run: |
+          test -f docs/AI_AUDIT_LOG.md || (echo "Missing docs/AI_AUDIT_LOG.md" && exit 1)
+          test -f docs/PROMPTS.md || (echo "Missing docs/PROMPTS.md" && exit 1)
+          test -f docs/REFLECTION.md || (echo "Missing docs/REFLECTION.md" && exit 1)
+          test -f docs/CHANGELOG.md || (echo "Missing docs/CHANGELOG.md" && exit 1)
+
+      - name: Check required docs are not empty
+        run: |
+          test -s docs/AI_AUDIT_LOG.md || (echo "AI_AUDIT_LOG.md is empty" && exit 1)
+          test -s docs/PROMPTS.md || (echo "PROMPTS.md is empty" && exit 1)
+          test -s docs/REFLECTION.md || (echo "REFLECTION.md is empty" && exit 1)
+          test -s docs/CHANGELOG.md || (echo "CHANGELOG.md is empty" && exit 1)
