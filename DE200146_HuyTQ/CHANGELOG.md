@@ -19,16 +19,16 @@ Nguyên tắc ghi changelog:
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học |  |
-| Mã môn học |  |
-| Lớp |  |
-| Học kỳ |  |
-| Tên bài tập / Project |  |
-| Tên sinh viên / Nhóm |  |
-| MSSV / Danh sách MSSV |  |
-| Giảng viên hướng dẫn |  |
+| Môn học |Software development project  |
+| Mã môn học | SWP391 |
+| Lớp | SE20A04 |
+| Học kỳ | SU26  |
+| Tên bài tập / Project | School Bus System |
+| Tên sinh viên / Nhóm | Trần Quốc Huy/Group 7 |
+| MSSV / Danh sách MSSV | DE200146 |
+| Giảng viên hướng dẫn | Lê Thiện Nhật Quang |
 | Repository URL |  |
-| Ngày bắt đầu |  |
+| Ngày bắt đầu | 19/05/2026 |
 | Ngày hoàn thành |  |
 
 ---
@@ -37,12 +37,12 @@ Nguyên tắc ghi changelog:
 
 | Phiên bản/Giai đoạn | Thời gian | Nội dung chính | Trạng thái |
 |---|---|---|---|
-| Phase 01 |  | Khởi tạo project | Not Started / In Progress / Completed |
-| Phase 02 |  | Phân tích yêu cầu | Not Started / In Progress / Completed |
-| Phase 03 |  | Thiết kế hệ thống | Not Started / In Progress / Completed |
-| Phase 04 |  | Implementation | Not Started / In Progress / Completed |
-| Phase 05 |  | Testing & Debug | Not Started / In Progress / Completed |
-| Phase 06 |  | Hoàn thiện báo cáo và demo | Not Started / In Progress / Completed |
+| Phase 01 | 19/05/2026 | Khởi tạo project | Not Started / In Progress / Completed |
+| Phase 02 | 20/05/2026 | Phân tích yêu cầu | Not Started / In Progress / Completed |
+| Phase 03 | 25/05/2026 | Thiết kế hệ thống | Not Started / In Progress / Completed |
+| Phase 04 | 27/05/2026 | Implementation | Not Started / In Progress / Completed |
+| Phase 05 | /0/2026 | Testing & Debug | Not Started / In Progress / Completed |
+| Phase 06 | /0/2026 | Hoàn thiện báo cáo và demo | Not Started / In Progress / Completed |
 
 ---
 
@@ -56,17 +56,17 @@ DD/MM/YYYY
 
 ## Đã hoàn thành
 
-- [ ] Tạo repository
-- [ ] Tạo cấu trúc thư mục project
-- [ ] Tạo file README.md
-- [ ] Tạo thư mục `docs/`
-- [ ] Tạo file `AI_AUDIT_LOG.md`
-- [ ] Tạo file `PROMPTS.md`
-- [ ] Tạo file `REFLECTION.md`
-- [ ] Tạo file `CHANGELOG.md`
-- [ ] Khởi tạo source code ban đầu
-- [ ] Cài đặt thư viện/công cụ cần thiết
-- [ ] Cấu hình môi trường chạy project
+- [x] Tạo repository
+- [x] Tạo cấu trúc thư mục project
+- [x] Tạo file README.md
+- [x] Tạo thư mục `docs/`
+- [x] Tạo file `AI_AUDIT_LOG.md`
+- [x] Tạo file `PROMPTS.md`
+- [x] Tạo file `REFLECTION.md`
+- [x] Tạo file `CHANGELOG.md`
+- [x] Khởi tạo source code ban đầu
+- [x] Cài đặt thư viện/công cụ cần thiết
+- [x] Cấu hình môi trường chạy project
 
 ## Thay đổi chi tiết
 
@@ -78,7 +78,7 @@ DD/MM/YYYY
 
 ## AI có hỗ trợ không?
 
-- [ ] Có
+- [x] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
@@ -112,13 +112,13 @@ DD/MM/YYYY
 ## Đã hoàn thành
 
 - [ ] Xác định problem statement
-- [ ] Xác định user roles
+- [x] Xác định user roles
 - [ ] Viết user stories
-- [ ] Viết use cases
-- [ ] Xác định functional requirements
-- [ ] Xác định non-functional requirements
-- [ ] Xác định business rules
-- [ ] Xác định acceptance criteria
+- [x] Viết use cases
+- [x] Xác định functional requirements
+- [x] Xác định non-functional requirements
+- [x] Xác định business rules
+- [x] Xác định acceptance criteria
 - [ ] Review yêu cầu với giảng viên/nhóm
 - [ ] Chỉnh sửa yêu cầu sau feedback
 
@@ -132,7 +132,7 @@ DD/MM/YYYY
 
 ## AI có hỗ trợ không?
 
-- [ ] Có
+- [x] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
@@ -166,12 +166,12 @@ DD/MM/YYYY
 ## Đã hoàn thành
 
 - [ ] Thiết kế kiến trúc tổng quan
-- [ ] Thiết kế database/ERD
+- [x] Thiết kế database/ERD
 - [ ] Thiết kế API
-- [ ] Thiết kế giao diện/wireframe
-- [ ] Thiết kế flow xử lý
+- [x] Thiết kế giao diện/wireframe
+- [x] Thiết kế flow xử lý
 - [ ] Thiết kế class diagram
-- [ ] Thiết kế sequence diagram
+- [x] Thiết kế sequence diagram
 - [ ] Thiết kế security/authorization flow
 - [ ] Review thiết kế
 - [ ] Chỉnh sửa thiết kế sau feedback
@@ -219,17 +219,17 @@ DD/MM/YYYY
 
 ## Đã hoàn thành
 
-- [ ] Tạo project structure
-- [ ] Cài đặt database connection
-- [ ] Xây dựng backend
-- [ ] Xây dựng frontend
-- [ ] Xây dựng authentication/authorization
-- [ ] Xử lý CRUD
-- [ ] Xử lý validation
+- [x] Tạo project structure
+- [x] Cài đặt database connection
+- [x] Xây dựng backend
+- [x] Xây dựng frontend
+- [x] Xây dựng authentication/authorization
+- [x] Xử lý CRUD
+- [x] Xử lý validation
 - [ ] Tích hợp API
 - [ ] Xử lý upload/download file
 - [ ] Xử lý lỗi
-- [ ] Tối ưu giao diện
+- [x] Tối ưu giao diện
 - [ ] Cập nhật README hướng dẫn chạy
 
 ## Thay đổi chi tiết
@@ -244,7 +244,7 @@ DD/MM/YYYY
 
 ## AI có hỗ trợ không?
 
-- [ ] Có
+- [x] Có
 - [ ] Không
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
