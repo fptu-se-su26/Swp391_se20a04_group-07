@@ -9,7 +9,7 @@
 | Lớp | SE20A04 |
 | Học kỳ | SU25 |
 | Tên bài tập / Project | School Bus System |
-| Tên sinh viên / Nhóm | Group 7 |
+| Tên sinh viên / Nhóm | Trần Quốc Huy/Group 7 |
 | MSSV / Danh sách MSSV | DE201129 - DE200146 - DE191015 - DE190387 - DE190390 |
 | Giảng viên hướng dẫn | 	Lê Thiện Nhật Quang |
 | Ngày bắt đầu | 19/05/2026 |
@@ -36,15 +36,15 @@ Sinh viên/nhóm cần ghi lại:
 
 Đánh dấu các công cụ AI đã sử dụng.
 
-- [ ] ChatGPT
+- [x] ChatGPT
 - [ ] Gemini
-- [ ] Claude
+- [x] Claude
 - [ ] GitHub Copilot
 - [ ] Cursor
 - [ ] Antigravity
 - [ ] Microsoft Copilot
 - [ ] Perplexity
-- [ ] Công cụ khác: ....................................
+- [x] Công cụ khác: Canva
 
 ---
 
