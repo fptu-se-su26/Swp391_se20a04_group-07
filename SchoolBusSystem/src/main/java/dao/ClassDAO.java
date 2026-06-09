@@ -31,6 +31,23 @@ public class ClassDAO extends DBContext {
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
+    
+// =========================================================================
+    // CẬP NHẬT TÊN LỚP, GIÁO VIÊN CHỦ NHIỆM VÀ NIÊN KHÓA
+    // =========================================================================
+    public boolean updateClass(int classId, String className, String teacherName, String academicYear) {
+        String sql = "UPDATE classes SET class_name = ?, teacher_name = ?, academic_year = ? WHERE class_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, className);
+            st.setString(2, teacherName);
+            st.setString(3, academicYear);
+            st.setInt(4, classId);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     public Class getClassById(int id) {
         String sql = "SELECT * FROM classes WHERE class_id = ?";

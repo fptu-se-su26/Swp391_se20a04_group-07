@@ -84,6 +84,87 @@ public class TripDAO extends DBContext {
         return list;
     }
 
+    // =========================================================================
+    // LẤY TẤT CẢ CHUYẾN ĐI KHẢ DỤNG CHO HỌC SINH ĐĂNG KÝ (CÓ JOIN LẤY TÊN)
+    // =========================================================================
+    public List<Trip> getAllAvailableTrips() {
+        List<Trip> list = new ArrayList<>();
+        String sql = "SELECT t.*, r.route_name, u.full_name AS driver_name "
+                + "FROM trips t "
+                + "LEFT JOIN routes r ON t.route_id = r.route_id "
+                + "LEFT JOIN drivers d ON t.driver_id = d.driver_id "
+                + "LEFT JOIN users u ON d.user_id = u.user_id "
+                + "WHERE t.status = 'ACTIVE' OR t.status = 'PENDING' "
+                + "ORDER BY t.trip_date ASC, t.start_time ASC";
+        try (PreparedStatement st = connection.prepareStatement(sql); ResultSet rs = st.executeQuery()) {
+            while (rs.next()) {
+                Trip trip = new Trip();
+                trip.setTripId(rs.getInt("trip_id"));
+                trip.setRouteId(rs.getInt("route_id"));
+                trip.setVehicleId(rs.getInt("vehicle_id"));
+                trip.setDriverId(rs.getInt("driver_id"));
+                trip.setTripDate(rs.getDate("trip_date"));
+                trip.setTripType(rs.getString("trip_type"));
+                trip.setStartTime(rs.getTimestamp("start_time"));
+                trip.setEndTime(rs.getTimestamp("end_time"));
+                trip.setStatus(rs.getString("status"));
+
+                // Gán thuộc tính hiển thị (DTO)
+                trip.setRouteName(rs.getString("route_name"));
+                trip.setDriverName(rs.getString("driver_name"));
+
+                list.add(trip);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+// =========================================================================
+    // CÁC HÀM XỬ LÝ ĐĂNG KÝ CHUYẾN ĐI (Dành cho chức năng của Học sinh)
+    // =========================================================================
+    // 1. Học sinh đăng ký chuyến đi
+    public boolean registerTrip(int tripId, int studentId) {
+        String sql = "INSERT INTO trip_registrations (trip_id, student_id, status) VALUES (?, ?, 'REGISTERED')";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, tripId);
+            st.setInt(2, studentId);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Lỗi đăng ký chuyến đi: " + e.getMessage());
+        }
+        return false;
+    }
+
+    // 2. Học sinh hủy đăng ký chuyến đi
+    public boolean cancelRegistration(int tripId, int studentId) {
+        String sql = "DELETE FROM trip_registrations WHERE trip_id = ? AND student_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, tripId);
+            st.setInt(2, studentId);
+            return st.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // 3. Kiểm tra xem Học sinh đã đăng ký chuyến này chưa (Để ẩn/hiện nút Đăng ký trên JSP)
+    public boolean isStudentRegistered(int tripId, int studentId) {
+        String sql = "SELECT 1 FROM trip_registrations WHERE trip_id = ? AND student_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, tripId);
+            st.setInt(2, studentId);
+            try (ResultSet rs = st.executeQuery()) {
+                return rs.next(); // Nếu có dòng dữ liệu trả về nghĩa là đã đăng ký
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // [BỔ SUNG] Hàm cập nhật Chuyến đi
     public boolean updateTrip(Trip t) {
         String sql = "UPDATE trips SET route_id=?, vehicle_id=?, driver_id=?, trip_date=?, trip_type=?, status=? WHERE trip_id=?";
@@ -100,6 +181,23 @@ public class TripDAO extends DBContext {
             e.printStackTrace();
         }
         return false;
+    }
+    
+    // Lấy danh sách ID các chuyến đi mà một học sinh đã đăng ký
+    public List<Integer> getRegisteredTripIdsByStudent(int studentId) {
+        List<Integer> list = new ArrayList<>();
+        String sql = "SELECT trip_id FROM trip_registrations WHERE student_id = ?";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, studentId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    list.add(rs.getInt("trip_id"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     // [BỔ SUNG] Tạo chuyến đi mới (Admin)

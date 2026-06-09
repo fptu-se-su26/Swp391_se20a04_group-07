@@ -116,6 +116,20 @@ public boolean insertParent(int userId, String address, String emergencyPhone, i
         }
         return false;
     }
+    
+// Cập nhật số điện thoại phụ huynh (phone và emergency_phone đều trong bảng parents)
+public boolean updateParentPhones(int parentId, String phone, String emergencyPhone) {
+        String sql = "UPDATE parents SET phone = ?, emergency_phone = ? WHERE parent_id = ?";
+        try (java.sql.PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setString(1, phone);
+            st.setString(2, emergencyPhone);
+            st.setInt(3, parentId);
+            return st.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     //Update profile
     public boolean updateParentProfile(int parentId, String address, String emergencyPhone) {
@@ -177,7 +191,7 @@ public boolean insertParent(int userId, String address, String emergencyPhone, i
     }
     
     // HÀM MỚI: Tra cứu ID Phụ huynh dựa vào Email
-    public int getParentIdByEmail(String email) {
+public int getParentIdByEmail(String email) {
         // Nối bảng parents và users để quét email
         String sql = "SELECT p.parent_id FROM parents p JOIN users u ON p.user_id = u.user_id WHERE u.email = ?";
         try (java.sql.PreparedStatement st = connection.prepareStatement(sql)) {
@@ -187,9 +201,9 @@ public boolean insertParent(int userId, String address, String emergencyPhone, i
                     return rs.getInt("parent_id"); // Tìm thấy, trả về ID
                 }
             }
-        } catch (java.sql.SQLException e) { 
-            e.printStackTrace(); 
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
         }
-        return 0; // Không tìm thấy, trả về 0
+        return 0;
     }
 }
