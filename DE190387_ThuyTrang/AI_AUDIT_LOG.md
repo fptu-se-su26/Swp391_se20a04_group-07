@@ -115,22 +115,37 @@ Viết tại đây...
 | Nội dung | Thông tin |
 |---|---|
 | Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích sử dụng |  |
-| Phần việc liên quan | Requirement / Design / Database / Frontend / Backend / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỗ trợ ý tưởng / Hỗ trợ một phần / Hỗ trợ nhiều / Sinh chính nội dung |
+| Công cụ AI | ChatGPT /GitHub Copilot  |
+| Mục đích sử dụng | Xây dựng các chức   |
+| Phần việc liên quan |  Design / Frontend / Backend  |
+| Mức độ sử dụng | Hỗ trợ ý tưởng |
 
 #### 4.1. Prompt đã sử dụng
+Tôi đang làm chức năng 'Đăng ký nghỉ học' cho Module Phụ huynh (Parent Module) trong dự án School Bus System sử dụng Java Web thuần (Servlet, JSP, JDBC, MySQL, Tomcat). Mô hình dự án là MVC + DAO.
 
-```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
-```
+Hãy viết code hoàn chỉnh cho tôi gồm các phần sau:
+
+SQL: Tạo bảng leave_requests (id, student_id, reason, leave_date, status).
+
+Model: File LeaveRequest.java phục vụ map dữ liệu.
+
+DAO: File LeaveRequestDAO.java có hàm insertLeaveRequest và getLeaveRequestsByStudent. Giả định tôi đã có class kết nối DB là DBContext.getConnection().
+
+Controller: File LeaveRequestServlet.java (gói controlllerparent). Xử lý doGet để hiển thị trang và danh sách, doPost để xử lý form submit.
+
+View: File leave-request.jsp sử dụng Bootstrap 5. Thiết kế giao diện chia làm 2 bên: Bên trái là Form (Chọn học sinh, Ngày nghỉ, Lý do), Bên phải là Bảng hiển thị lịch sử xin nghỉ với Badge trạng thái màu sắc.
 
 #### 4.2. Kết quả AI gợi ý
 
-```text
-Viết tại đây...
-```
+Database (SQL): Tạo bảng leave_requests để lưu trữ thông tin học sinh nghỉ học, lý do và trạng thái phê duyệt (Pending, Approved, Rejected).
+
+Model (LeaveRequest.java): Lớp đối tượng (Java Bean) dùng để đóng gói và ánh xạ dữ liệu từ Database lên ứng dụng.
+
+DAO (LeaveRequestDAO.java): Lớp xử lý trực tiếp với Database bằng PreparedStatement, gồm hàm thêm đơn mới (insertLeaveRequest) và hàm lấy danh sách lịch sử nghỉ học (getLeaveRequestsByStudent).
+
+Controller (LeaveRequestServlet.java): Đóng vai trò điều hướng. Hàm doGet dùng để tải trang và hiển thị lịch sử; hàm doPost dùng để tiếp nhận thông tin từ form phụ huynh gửi lên để lưu vào DB.
+
+View (leave-request.jsp): File giao diện sử dụng Bootstrap 5 chia bố cục làm 2 phần như slide thuyết trình (Bên trái là Form nhập đơn, Bên phải là Bảng hiển thị lịch sử có các Badge màu sắc cho trạng thái).
 
 #### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
 

@@ -35,11 +35,13 @@ public class LoginServlet extends HttpServlet {
 
         if (user != null) {
             
+// =========================================================
+            // CHỐT CHẶN AN NINH: CẤM PHỤ HUYNH & HỌC SINH ĐĂNG NHẬP BẰNG MẬT KHẨU
             // =========================================================
-            // CHỐT CHẶN AN NINH: CẤM PHỤ HUYNH ĐĂNG NHẬP BẰNG MẬT KHẨU
-            // =========================================================
-            if (user.getRoleId() == 3) {
-                request.setAttribute("error", "Quý phụ huynh vui lòng đăng nhập bằng tài khoản Google!");
+            if (user.getRoleId() == 3 || user.getRoleId() == 4) {
+                // Tùy biến câu thông báo dựa theo role
+                String roleName = (user.getRoleId() == 3) ? "phụ huynh" : "học sinh";
+                request.setAttribute("error", "Quý " + roleName + " vui lòng đăng nhập bằng tài khoản Google!");
                 request.getRequestDispatcher("/auth/login.jsp").forward(request, response);
                 return; 
             }
