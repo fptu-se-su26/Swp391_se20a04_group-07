@@ -9,7 +9,7 @@
 | Lớp | SE20A04 |
 | Học kỳ | SU25 |
 | Tên bài tập / Project | School Bus System |
-| Tên sinh viên / Nhóm | Group 7 |
+| Tên sinh viên / Nhóm | Trần Quốc Huy/Group 7 |
 | MSSV / Danh sách MSSV | DE201129 - DE200146 - DE191015 - DE190387 - DE190390 |
 | Giảng viên hướng dẫn | 	Lê Thiện Nhật Quang |
 | Ngày bắt đầu | 19/05/2026 |
@@ -36,15 +36,15 @@ Sinh viên/nhóm cần ghi lại:
 
 Đánh dấu các công cụ AI đã sử dụng.
 
-- [ ] ChatGPT
+- [x] ChatGPT
 - [ ] Gemini
-- [ ] Claude
+- [x] Claude
 - [ ] GitHub Copilot
 - [ ] Cursor
 - [ ] Antigravity
 - [ ] Microsoft Copilot
 - [ ] Perplexity
-- [ ] Công cụ khác: ....................................
+- [x] Công cụ khác: Canva
 
 ---
 
@@ -409,11 +409,15 @@ Gợi ý:
 
 ### 8.2. Em/nhóm đã học được gì về cách đặt câu hỏi cho AI?
 
-Em/nhóm đã học được rằng việc đặt câu hỏi cho AI càng rõ ràng và chi tiết thì kết quả nhận được càng chính xác. Khi đặt câu hỏi, cần nêu rõ mục tiêu, ngữ cảnh, yêu cầu đầu ra và các ràng buộc cụ thể. Ngoài ra, có thể chia vấn đề lớn thành nhiều câu hỏi nhỏ để AI hỗ trợ hiệu quả hơn. Em/nhóm cũng nhận thấy cần kiểm tra và đánh giá lại thông tin do AI cung cấp thay vì sử dụng hoàn toàn mà không xác minh.
+```text
+Viết tại đây...
+```
 
 ### 8.3. Lần sau em/nhóm sẽ cải thiện prompt như thế nào?
 
-Lần sau, em/nhóm sẽ viết prompt cụ thể và chi tiết hơn, cung cấp đầy đủ ngữ cảnh, mục tiêu, định dạng kết quả mong muốn và các yêu cầu liên quan. Em/nhóm cũng sẽ chia các vấn đề phức tạp thành nhiều câu hỏi nhỏ để AI hiểu rõ hơn và đưa ra câu trả lời chính xác, phù hợp hơn.
+```text
+Viết tại đây...
+```
 
 ---
 
