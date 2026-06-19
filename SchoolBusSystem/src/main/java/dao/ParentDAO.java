@@ -87,17 +87,19 @@ public class ParentDAO extends DBContext {
         return null;
     }
 
-    // [BỔ SUNG] Thêm mới Phụ huynh
-public boolean insertParent(int userId, String address, String emergencyPhone, int areaId) {
-        String sql = "INSERT INTO parents (user_id, address, emergency_phone, area_id) VALUES (?, ?, ?, ?)";
+// =========================================================================
+    // HÀM MỚI: CHÈN DỮ LIỆU VÀO BẢNG PARENTS
+    // =========================================================================
+    public boolean insertParent(int userId, int areaId, String phone, String emergencyPhone) {
+        String sql = "INSERT INTO parents (user_id, area_id, phone, emergency_phone) VALUES (?, ?, ?, ?)";
         try (PreparedStatement st = connection.prepareStatement(sql)) {
             st.setInt(1, userId);
-            st.setString(2, address);
-            st.setString(3, emergencyPhone);
-            st.setInt(4, areaId);
+            st.setInt(2, areaId);
+            st.setString(3, phone);
+            st.setString(4, emergencyPhone);
             return st.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println("Lỗi tạo Parent: " + e.getMessage());
+            e.printStackTrace();
         }
         return false;
     }

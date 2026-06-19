@@ -17,16 +17,22 @@
                 <div class="card-body p-4 p-lg-5">
                     <form action="${pageContext.request.contextPath}/admin/add-student" method="POST">
 
-                        <h6 class="fw-bold text-primary mb-3 border-bottom pb-2"><i class="fab fa-google me-2"></i>THÔNG TIN PHỤ HUYNH</h6>
+                        <h6 class="fw-bold text-primary mb-3 border-bottom pb-2"><i class="fas fa-user-shield me-2"></i>THÔNG TIN PHỤ HUYNH</h6>
 
                         <div class="row mb-3">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold text-secondary small text-uppercase">Gmail Phụ Huynh</label>
                                 <input type="email" class="form-control" name="parentEmail" placeholder="Nhập Gmail đăng nhập..." required>
-                                <small class="text-muted fst-italic">Hệ thống tự động ghép nhóm nếu Gmail đã có, hoặc tạo mới nếu chưa.</small>
+                                <small class="text-muted fst-italic">Tự động ghép nhóm nếu Gmail đã tồn tại.</small>
                             </div>
 
                             <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-secondary small text-uppercase">Họ Tên Phụ Huynh</label>
+                                <input type="text" class="form-control" name="parentName" placeholder="Nhập họ và tên phụ huynh..." required>
+                                <small class="text-muted fst-italic">Bắt buộc để khởi tạo hồ sơ nếu là phụ huynh mới.</small>
+                            </div>
+
+                            <div class="col-md-12 mb-3">
                                 <label class="form-label fw-bold text-secondary small text-uppercase">Khu Vực Phụ Huynh</label>
                                 <select name="areaId" class="form-select" required>
                                     <option value="">-- Chọn khu vực cư trú --</option>
@@ -34,7 +40,6 @@
                                         <option value="${a.areaId}">📍 ${a.areaName}</option>
                                     </c:forEach>
                                 </select>
-                                <small class="text-muted fst-italic">Dùng để phân luồng nếu đây là Gmail mới hoàn toàn.</small>
                             </div>
                         </div>
 
@@ -46,13 +51,13 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold text-secondary small text-uppercase">SĐT khẩn cấp phụ (Tùy chọn)</label>
+                                <label class="form-label fw-bold text-secondary small text-uppercase">SĐT khẩn cấp (Tùy chọn)</label>
                                 <input type="tel" class="form-control" name="emergencyPhone" placeholder="SĐT người thân khác..." pattern="[0-9]{9,11}">
                                 <small class="text-muted fst-italic">Để trống nếu không có số dự phòng.</small>
                             </div>
                         </div>
 
-                        <h6 class="fw-bold text-success mb-3 border-bottom pb-2"><i class="fas fa-user-graduate me-2"></i>HỒ SƠ HỌC SINH</h6>
+                        <h6 class="fw-bold text-success mb-3 border-bottom pb-2 mt-4"><i class="fas fa-user-graduate me-2"></i>HỒ SƠ HỌC SINH</h6>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold text-secondary small text-uppercase">Gmail Học Sinh (Tùy chọn)</label>
