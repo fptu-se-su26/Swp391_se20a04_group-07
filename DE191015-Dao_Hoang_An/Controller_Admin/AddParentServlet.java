@@ -11,78 +11,99 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * AddParentServlet - Thêm phụ huynh, có thể tự động liên kết với học sinh.
+ *
+ * BẢO MẬT:
+ *  - Hash mật khẩu qua UserDAO (salt + SHA-256)
+ *  - Validate tất cả input đầu vào
+ *  - Rollback user nếu tạo parent thất bại
+ */
 @WebServlet(name = "AddParentServlet", urlPatterns = {"/admin/add-parent"})
 public class AddParentServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String targetStudentId = request.getParameter("studentId");
-        String classId = request.getParameter("classId"); // Lấy thêm classId từ URL
-        
-        if (targetStudentId != null && !targetStudentId.isEmpty()) {
-            request.setAttribute("targetStudentId", targetStudentId);
-            request.setAttribute("classId", classId); // Đẩy classId sang JSP để giữ lại
-        }
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String targetStudentId = trim(request.getParameter("studentId"));
+        String classId         = trim(request.getParameter("classId"));
 
+        if (!targetStudentId.isEmpty()) {
+            request.setAttribute("targetStudentId", targetStudentId);
+            request.setAttribute("classId", classId);
+        }
         request.setAttribute("areaList", new ParentAreaDAO().getAllAreas());
         request.getRequestDispatcher("/admin/add-parent.jsp").forward(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        UserDAO userDAO = new UserDAO();
+
+        // ── 1. ĐỌC & VALIDATE INPUT ──────────────────────────────────────────
+        String fullName       = trim(request.getParameter("fullName"));
+        String email          = trim(request.getParameter("email"));
+        String password       = trim(request.getParameter("password"));
+        String phone          = trim(request.getParameter("phone"));
+        String address        = trim(request.getParameter("address"));
+        String emergencyPhone = trim(request.getParameter("emergencyPhone"));
+        String areaIdStr      = trim(request.getParameter("areaId"));
+        String targetStudentId = trim(request.getParameter("targetStudentId"));
+        String classId        = trim(request.getParameter("classId"));
+
+        if (fullName.isEmpty() || email.isEmpty() || password.isEmpty() || areaIdStr.isEmpty()) {
+            response.sendRedirect("add-parent?error=missing_fields");
+            return;
+        }
+
+        int areaId;
+        try {
+            areaId = Integer.parseInt(areaIdStr);
+        } catch (NumberFormatException e) {
+            response.sendRedirect("add-parent?error=invalid_area");
+            return;
+        }
+
+        // ── 2. TẠO TÀI KHOẢN USER ───────────────────────────────────────────
+        UserDAO  userDAO   = new UserDAO();
         ParentDAO parentDAO = new ParentDAO();
 
-        try {
-            String fullName = request.getParameter("fullName");
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
-            String phone = request.getParameter("phone");
-            
-            String address = request.getParameter("address");
-            String emergencyPhone = request.getParameter("emergencyPhone");
-            int areaId = Integer.parseInt(request.getParameter("areaId"));
+        // insertUserAndReturnId tự hash mật khẩu bên trong
+        int newUserId = userDAO.insertUserAndReturnId(email, password, phone, fullName, 3);
 
-            int parentRoleId = 3; 
-
-            int newUserId = userDAO.insertUserAndReturnId(email, password, phone, fullName, parentRoleId);
-
-            if (newUserId != -1) {
-                if (parentDAO.insertParent(newUserId, address, emergencyPhone, areaId)) {
-                    
-                    // =========================================================
-                    // KIỂM TRA VÀ TỰ ĐỘNG LIÊN KẾT HỌC SINH
-                    // =========================================================
-                    String targetStudentId = request.getParameter("targetStudentId");
-                    String classId = request.getParameter("classId"); // Hứng classId từ form gửi lên
-                    
-                    if (targetStudentId != null && !targetStudentId.isEmpty()) {
-                        int studentId = Integer.parseInt(targetStudentId);
-                        int newParentId = parentDAO.getParentIdByUserId(newUserId);
-                        
-                        if (newParentId != -1) {
-                            StudentDAO studentDAO = new StudentDAO();
-                            studentDAO.updateStudentParent(studentId, newParentId); // Thực hiện nối ID
-                            
-                            // Nối thành công, đẩy về trang quản lý học sinh của đúng lớp đó
-                            response.sendRedirect("manage-students?classId=" + classId + "&msg=parent_linked");
-                            return; 
-                        }
-                    }
-                    
-                    // Nếu thêm bình thường (không đi từ trang quản lý HS sang) thì về trang phụ huynh
-                    response.sendRedirect("manage-parents?msg=add_success");
-                } else {
-                    userDAO.deleteUser(newUserId);
-                    response.sendRedirect("add-parent?error=parent_profile_failed");
-                }
-            } else {
-                response.sendRedirect("add-parent?error=user_exists");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendRedirect("add-parent?error=invalid_data");
+        if (newUserId == -1) {
+            response.sendRedirect("add-parent?error=user_exists");
+            return;
         }
+
+        // ── 3. TẠO HỒ SƠ PHỤ HUYNH ─────────────────────────────────────────
+        if (!parentDAO.insertParent(newUserId, areaId, phone, emergencyPhone)) {
+            userDAO.deleteUser(newUserId); // Rollback
+            response.sendRedirect("add-parent?error=parent_profile_failed");
+            return;
+        }
+
+        // ── 4. LIÊN KẾT HỌC SINH (nếu đến từ trang quản lý học sinh) ────────
+        if (!targetStudentId.isEmpty()) {
+            try {
+                int studentId  = Integer.parseInt(targetStudentId);
+                int newParentId = parentDAO.getParentIdByUserId(newUserId);
+
+                if (newParentId > 0) {
+                    new StudentDAO().updateStudentParent(studentId, newParentId);
+                    response.sendRedirect("manage-students?classId=" + classId + "&msg=parent_linked");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                // studentId không hợp lệ → fallthrough về trang phụ huynh
+            }
+        }
+
+        response.sendRedirect("manage-parents?msg=add_success");
+    }
+
+    private String trim(String value) {
+        return value == null ? "" : value.trim();
     }
 }
