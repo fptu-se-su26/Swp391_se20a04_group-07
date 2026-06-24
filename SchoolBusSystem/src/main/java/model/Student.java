@@ -29,6 +29,13 @@ public class Student {
     private String parentPhone;
     private String emergencyPhone;
 
+    // [TRACKING] Thông tin chuyến xe hôm nay — dùng cho ParentDashboard
+    private int    tripId;        // 0 = chưa có chuyến hôm nay
+    private String tripStatus;    // PENDING / ACTIVE / COMPLETED ...
+    private String routeName;     // Tên lộ trình
+    private String vehiclePlate;  // Biển số xe
+    private String driverName;    // Tên tài xế
+
     // 1. Constructor rỗng
     public Student() {
     }
@@ -194,4 +201,20 @@ public class Student {
     public void setAreaName(String areaName) {
         this.areaName = areaName;
     }
+    // ---- TRACKING: getter & setter cho thông tin chuyến xe hôm nay ----
+
+    public int getTripId() { return tripId; }
+    public void setTripId(int tripId) { this.tripId = tripId; }
+
+    public String getTripStatus() { return tripStatus; }
+    public void setTripStatus(String tripStatus) { this.tripStatus = tripStatus; }
+
+    public String getRouteName() { return routeName; }
+    public void setRouteName(String routeName) { this.routeName = routeName; }
+
+    public String getVehiclePlate() { return vehiclePlate; }
+    public void setVehiclePlate(String vehiclePlate) { this.vehiclePlate = vehiclePlate; }
+
+    public String getDriverName() { return driverName; }
+    public void setDriverName(String driverName) { this.driverName = driverName; }
 }

@@ -14,6 +14,9 @@ public class Trip {
     private String status;
     private String routeName;
     private String driverName;
+    private String vehiclePlate;  // Biển số xe
+    private String startPoint;     // Điểm đón (start_location của route)
+    private String endPoint;       // Điểm đến (end_location của route)
 
     public Trip() {}
 
@@ -51,4 +54,10 @@ public class Trip {
     public void setRouteName(String routeName) { this.routeName = routeName; }
     public String getDriverName() { return driverName; }
     public void setDriverName(String driverName) { this.driverName = driverName; }
+    public String getVehiclePlate() { return vehiclePlate; }
+    public void setVehiclePlate(String vehiclePlate) { this.vehiclePlate = vehiclePlate; }
+    public String getStartPoint() { return startPoint; }
+    public void setStartPoint(String startPoint) { this.startPoint = startPoint; }
+    public String getEndPoint() { return endPoint; }
+    public void setEndPoint(String endPoint) { this.endPoint = endPoint; }
 }

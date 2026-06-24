@@ -269,6 +269,42 @@ public class TripDAO extends DBContext {
         return list;
     }
 
+
+    // =========================================================================
+    // LẤY CHUYẾN XE HÔM NAY CỦA TÀI XẾ (dùng cho DriverDashboard)
+    // JOIN routes để lấy route_name, vehicles để lấy biển số
+    // =========================================================================
+    public List<Trip> getTodayTripsByDriver(int driverId) {
+        List<Trip> list = new ArrayList<>();
+        String sql =
+            "SELECT t.*, r.route_name, v.license_plate AS vehicle_plate, " +
+            "       r.start_location AS start_point, r.end_location AS end_point " +
+            "FROM trips t " +
+            "LEFT JOIN routes r   ON r.route_id   = t.route_id " +
+            "LEFT JOIN vehicles v ON v.vehicle_id = t.vehicle_id " +
+            "WHERE t.driver_id = ? " +
+            "  AND CONVERT(date, t.trip_date) = CONVERT(date, GETDATE()) " +
+            "  AND t.status NOT IN (N'CANCELLED') " +
+            "ORDER BY t.start_time ASC";
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, driverId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Trip t = mapTrip(rs);
+                    try { t.setRouteName(rs.getString("route_name")); }     catch (Exception ignored) {}
+                    try { t.setVehiclePlate(rs.getString("vehicle_plate")); } catch (Exception ignored) {}
+                    try { t.setStartPoint(rs.getString("start_point")); }   catch (Exception ignored) {}
+                    try { t.setEndPoint(rs.getString("end_point")); }       catch (Exception ignored) {}
+                    list.add(t);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[TripDAO] Lỗi getTodayTripsByDriver: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     private Trip mapTrip(ResultSet rs) throws SQLException {
         return new Trip(rs.getInt("trip_id"), rs.getInt("route_id"), rs.getInt("vehicle_id"), rs.getInt("driver_id"),
                 rs.getDate("trip_date"), rs.getString("trip_type"), rs.getTimestamp("start_time"), rs.getTimestamp("end_time"), rs.getString("status"));

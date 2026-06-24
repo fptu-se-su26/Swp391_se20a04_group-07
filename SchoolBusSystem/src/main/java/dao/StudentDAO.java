@@ -327,4 +327,70 @@ public class StudentDAO extends DBContext {
             // Cột không tồn tại trong query hiện tại — bỏ qua, không log
         }
     }
+
+    // =========================================================================
+    // LẤY HỌC SINH KÈM THÔNG TIN CHUYẾN XE HÔM NAY THEO PARENT ID
+    // Dùng cho ParentDashboard — phụ huynh chỉ thấy tài xế đang chở con họ
+    //
+    // JOIN:
+    //   students → trip_registrations (student_id) → trips (trip_id, hôm nay)
+    //   trips    → drivers (driver_id) → users (full_name tài xế)
+    //   trips    → vehicles (vehicle_id, biển số)
+    //   trips    → routes (route_id, tên lộ trình)
+    //   students → classes (class_name)
+    //
+    // Nếu con chưa có chuyến hôm nay → tripId = 0, các field còn lại = null
+    // =========================================================================
+    public List<Student> getStudentsWithTodayTripByParentId(int parentId) {
+        List<Student> list = new ArrayList<>();
+        String sql =
+            "SELECT s.student_id, s.parent_id, s.full_name, s.gender, s.date_of_birth, " +
+            "       s.school_name, s.address, s.avatar, s.status, s.class_id, " +
+            "       s.student_code, s.user_id, " +
+            "       c.class_name, " +
+            // Thông tin chuyến hôm nay (NULL nếu không có chuyến)
+            "       t.trip_id, " +
+            "       t.status        AS trip_status, " +
+            "       r.route_name, " +
+            "       v.license_plate AS vehicle_plate, " +
+            "       ud.full_name    AS driver_name " +
+            "FROM students s " +
+            "LEFT JOIN classes c              ON c.class_id   = s.class_id " +
+            // Lấy đăng ký chuyến hôm nay của học sinh (status còn hoạt động)
+            "LEFT JOIN trip_registrations tr  ON tr.student_id = s.student_id " +
+            "                                AND tr.status IN (N'PENDING', N'CONFIRMED', N'active') " +
+            "LEFT JOIN trips t                ON t.trip_id    = tr.trip_id " +
+            "                                AND CONVERT(date, t.trip_date) = CONVERT(date, GETDATE()) " +
+            "                                AND t.status     NOT IN (N'CANCELLED', N'COMPLETED') " +
+            "LEFT JOIN routes r               ON r.route_id   = t.route_id " +
+            "LEFT JOIN vehicles v             ON v.vehicle_id = t.vehicle_id " +
+            "LEFT JOIN drivers d              ON d.driver_id  = t.driver_id " +
+            "LEFT JOIN users ud               ON ud.user_id   = d.user_id " +
+            "WHERE s.parent_id = ? AND s.status = 1";
+
+        try (PreparedStatement st = connection.prepareStatement(sql)) {
+            st.setInt(1, parentId);
+            try (ResultSet rs = st.executeQuery()) {
+                while (rs.next()) {
+                    Student s = mapStudent(rs);
+
+                    // tripId (0 = không có chuyến hôm nay)
+                    int tripId = rs.getInt("trip_id");
+                    s.setTripId(rs.wasNull() ? 0 : tripId);
+
+                    // Thông tin tài xế + xe + lộ trình (có thể null)
+                    s.setTripStatus(rs.getString("trip_status"));
+                    s.setRouteName(rs.getString("route_name"));
+                    s.setVehiclePlate(rs.getString("vehicle_plate"));
+                    s.setDriverName(rs.getString("driver_name"));
+
+                    list.add(s);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[StudentDAO] Lỗi getStudentsWithTodayTripByParentId: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
