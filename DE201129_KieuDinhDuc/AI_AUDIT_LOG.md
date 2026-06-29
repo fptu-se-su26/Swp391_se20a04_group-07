@@ -275,10 +275,10 @@ Xác nhận API wasNull() tồn tại thông qua kiểm tra Java SE Documentatio
 docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html.
 ```
 
-#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến 
 
 ```text
-⚠️ Phát hiện Oversimplification (Hallucination #1): wasNull() chỉ đáng tin cậy ngay sau lần
+ Phát hiện Oversimplification (Hallucination #1): wasNull() chỉ đáng tin cậy ngay sau lần
 gọi getter liền trước — nếu có bất kỳ getter nào khác gọi xen vào giữa, kết quả wasNull() sẽ
 bị overwrite. AI không đề cập đến edge case quan trọng này.
 
@@ -567,14 +567,166 @@ Cần tự phân tích compatibility của mỗi giải pháp với kiến trúc
 ---
 
 
+### Lần sử dụng AI số 9
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 6/6/2026 |
+| Công cụ AI | Claude |
+| Mục đích sử dụng | Quyết định 1 hay 2 hàm update cho Admin và Driver |
+| Phần việc liên quan | Backend |
+| Mức độ sử dụng | Hỗ trợ ý tưởng |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Tôi có 2 use case: Admin sửa tất cả thông tin Driver (full_name, birth_year, area_id, vehicle_id,
+license_number, experience_years), Driver chỉ tự sửa license_number và experience_years. Nên
+viết 1 hàm updateDriver(Driver d) chung hay 2 hàm riêng biệt?
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI gợi ý dùng 1 hàm updateDriver(Driver d, String[] allowedFields) với danh sách field được
+phép sửa, build dynamic SQL từ đó. AI nói đây là pattern "flexible và reusable".
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Hiểu rõ vấn đề cần giải quyết (permission boundary giữa Admin và Driver update).
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+Gợi ý AI về dynamic SQL với allowedFields array NGUY HIỂM về security — build SQL động từ
+tên cột có nguy cơ SQL Injection nếu không whitelist kỹ. Lại là pattern phức tạp hơn mức
+cần cho 2 use case cố định đơn giản.
+
+Quyết định: 2 hàm riêng biệt: updateDriver(Driver d) cho Admin (sửa toàn bộ) và
+updateDriverProfile(int driverId, String licenseNumber, int experienceYears) cho Driver.
+SQL cố định, không dynamic. Authorization check ở Servlet layer (kiểm tra role trong
+Session trước khi gọi đúng hàm DAO). An toàn hơn, dễ đọc hơn, dễ test hơn.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | https://github.com/fptu-se-su26/Swp391_se20a04_group-07.git|
+| File liên quan | DriverDAO.java |
+| Screenshot |  |
+| Kết quả chạy/test |  |
+| Link video demo |  |
+| Ghi chú khác | |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+Học được rằng "flexible và reusable" không phải lúc nào cũng tốt hơn "simple và safe". Với
+requirement cố định và rõ ràng, simplicity > flexibility. Dynamic SQL là red flag về bảo mật
+cần cân nhắc kỹ.
+```
+
+---
+
+### Lần sử dụng AI số 10
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 10/6/2026|
+| Công cụ AI | Claude |
+| Mục đích sử dụng | Quyết định hard delete hay soft delete cho deleteDriver() |
+| Phần việc liên quan | Database / Backend |
+| Mức độ sử dụng | Hỗ trợ ý tưởng |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+Trong hệ thống School Bus, nếu xóa một Driver bằng DELETE SQL, các bản ghi trips và attendance
+liên quan đến driver đó sẽ bị ảnh hưởng thế nào? Nên dùng hard delete hay soft delete?
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+```text
+AI giải thích: Hard delete sẽ gây lỗi Foreign Key Constraint nếu bảng trips có FOREIGN KEY
+(driver_id) REFERENCES drivers. Soft delete (thêm cột status = 0) được khuyến nghị để giữ
+lịch sử. AI gợi ý thêm cột is_deleted vào bảng drivers.
+```
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+```text
+Xác nhận nguy cơ FK Constraint violation khi hard delete. Đồng ý cần soft delete để giữ
+lịch sử chuyến đi.
+```
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+```text
+AI không tính đến chi phí thay đổi khi thêm cột is_deleted: phải ALTER TABLE, update tất cả
+query getAllDrivers(), getDriverById() để lọc WHERE is_deleted = 0 — thay đổi lan rộng ảnh
+hưởng toàn bộ DAO.
+
+Giải pháp sáng tạo hơn: Soft delete qua User status thay vì thêm column. Disable account User
+tương ứng (UPDATE users SET status = 0) thay vì xóa Driver record. Driver bị disable sẽ không
+login được, trips history vẫn còn nguyên. Zero schema change, bảo toàn data integrity.
+
+So sánh: Hard DELETE → FK violation. Soft delete (is_deleted) → cần ALTER TABLE + update nhiều
+query. Soft delete qua users.status → zero schema change, FK không vi phạm.
+```
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | https://github.com/fptu-se-su26/Swp391_se20a04_group-07.git |
+| File liên quan | DriverDAO.java, UserDAO.java |
+| Screenshot |  |
+| Kết quả chạy/test | |
+| Link video demo |  |
+| Ghi chú khác | Hard DELETE → FK violation; soft delete qua users.status → trips history nguyên vẹn |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+```text
+Học được cách đánh giá cost of implementation của mỗi giải pháp, không chỉ correctness. AI
+đề xuất giải pháp chuẩn nhưng không biết schema hiện tại — developer cần tự tìm giải pháp
+phù hợp với context thực tế.
+```
+
+---
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
 
-
+| Hạng mục | Không dùng AI | AI hỗ trợ ít | AI hỗ trợ nhiều | AI sinh chính | Ghi chú |
+|---|:---:|:---:|:---:|:---:|---|
+| Phân tích yêu cầu | | ✓ | | | Tự phân tích use case từ schema thực |
+| Viết user story/use case | ✓ | | | | |
+| Thiết kế database | | ✓ | | | AI gợi ý JOIN type, tự quyết định schema |
+| Thiết kế kiến trúc hệ thống | | ✓ | | | AI gợi ý pattern, tự quyết định theo quy mô |
+| Thiết kế giao diện | ✓ | | | | |
+| Code frontend | ✓ | | | | |
+| Code backend | | ✓ | | | AI gợi ý, tự viết và điều chỉnh toàn bộ code |
+| Debug lỗi | | | ✓ | | AI xác định root cause JOIN sai (Entry #007) |
+| Viết test case | ✓ | | | | |
+| Kiểm thử sản phẩm | ✓ | | | | |
+| Tối ưu code | | ✓ | | | AI gợi ý pattern, tự đánh giá và chọn |
+| Viết báo cáo | ✓ | | | | |
+| Làm slide thuyết trình | ✓ | | | | |
 
 ---
 
 ## 6. Các lỗi hoặc hạn chế từ AI
 
+| STT | Lỗi/hạn chế từ AI | Cách phát hiện | Cách xử lý/cải tiến |
+|---:|---|---|---|
+| 1 | **Oversimplification** – `wasNull()` tồn tại nhưng AI bỏ qua edge case thứ tự gọi getter (Entry #004) | Đọc Java SE Documentation gốc tại docs.oracle.com | Thay bằng `rs.getObject("vehicle_id") != null` để tránh phụ thuộc thứ tự |
+| 2 | **Logic Error** – AI ban đầu gợi ý `Statement` nhanh hơn `PreparedStatement`, bỏ qua SQL Injection risk (Entry #006) | Kiến thức nền về SQL Injection, sau đó hỏi lại AI để cross-check | Giữ `PreparedStatement` 100% trong toàn bộ DriverDAO |
+| 3 | **Context mismatch** – AI thường gợi ý enterprise pattern (DTO, tách DAO, JDBC transaction) không phù hợp với quy mô Lab Servlet/JSP thuần | So sánh gợi ý với thực tế project (không có Spring, 1 developer, deadline ngắn) | Luôn filter gợi ý AI theo quy mô thực tế trước khi áp dụng |
 
 ---
 
@@ -583,7 +735,25 @@ Cần tự phân tích compatibility của mỗi giải pháp với kiến trúc
 ### Nội dung kiểm chứng
 
 ```text
+Các phương pháp kiểm chứng đã sử dụng trong module Driver:
 
+1. Chạy thử chương trình: Kiểm tra kết quả query trực tiếp trên DB test (5 driver records),
+   xác nhận fix JOIN chain (Entry #007) — full_name không còn NULL.
+
+2. So sánh với tài liệu chính thức: Kiểm tra wasNull() API tại Java SE Documentation
+   (docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html) — Entry #004.
+
+3. Kiểm tra output: So sánh danh sách Driver trước/sau khi chuyển từ INNER JOIN sang
+   LEFT JOIN — xác nhận Driver mới chưa có vehicle/area vẫn hiển thị đúng.
+
+4. Review code: Tự kiểm tra toàn bộ hàm có JOIN sau khi fix Entry #007 để phát hiện
+   lỗi pattern lặp lại trong getDriverById() và getDriverByUserId().
+
+5. Kiểm tra bảo mật: Cross-check gợi ý Statement vs PreparedStatement (Entry #006)
+   bằng kiến thức SQL Injection, sau đó hỏi lại AI để xác nhận.
+
+6. So sánh với schema thực: Kiểm tra schema bảng trước khi áp dụng gợi ý soft delete
+   của AI (Entry #010) — phát hiện không có cột status trong bảng drivers.
 ```
 
 ---
@@ -593,7 +763,23 @@ Cần tự phân tích compatibility của mỗi giải pháp với kiến trúc
 ### 8.1. Đối với bài cá nhân
 
 ```text
+Phần tự làm:
+- Phân tích use case thực tế của module Driver từ schema database
+- Viết toàn bộ code DriverDAO.java (8 methods), Driver.java model
+- Debug và fix lỗi JOIN chain trong cả 3 hàm có JOIN
+- Quyết định kiến trúc (1 DriverDAO, không tách, không DTO)
+- Implement soft delete qua users.status (giải pháp sáng tạo không theo AI)
+- Thêm comment schema mapping trong DriverDAO.java
 
+Phần AI hỗ trợ:
+- Gợi ý ban đầu về cấu trúc DAO, method list, JOIN type, transaction pattern
+- Debug root cause lỗi JOIN sai bảng trung gian (Entry #007)
+
+Phần tự cải tiến:
+- Filter bỏ enterprise pattern không phù hợp quy mô Lab (Entry #001, #005)
+- Phát hiện và xử lý 2 hallucination (Entry #004, #006)
+- Mở rộng scope fix từ 1 hàm → 3 hàm sau khi AI chỉ fix getAllDrivers() (Entry #007)
+- Tìm giải pháp soft delete không cần ALTER TABLE (Entry #010)
 ```
 
 ---
@@ -603,37 +789,61 @@ Cần tự phân tích compatibility của mỗi giải pháp với kiến trúc
 ### 9.1. AI đã hỗ trợ em/nhóm ở điểm nào?
 
 ```text
-
+AI hỗ trợ hiệu quả nhất ở việc: (1) Gợi ý nhanh các pattern và trade-off kiến trúc để tôi
+có điểm xuất phát cho quyết định, (2) Debug root cause lỗi JOIN chain sai bảng — AI xác định
+vấn đề nhanh hơn tôi tự debug, (3) Liệt kê các phương án giải quyết (transaction vs manual
+rollback, DTO vs display field) giúp tôi tư duy có hệ thống hơn.
 ```
 
 ### 9.2. Phần nào em/nhóm không sử dụng theo gợi ý của AI? Vì sao?
 
 ```text
-
+- Không tách DAO theo SRP (Entry #001): AI không biết project dùng Tomcat + JDBC thuần,
+  không có DI container. Tách nhiều lớp gây overhead không cần thiết.
+- Không tạo DriverDTO (Entry #005): Over-engineering cho quy mô Lab Servlet/JSP thuần.
+- Không dùng JDBC transaction (Entry #008): Kiến trúc shared connection trong DBContext
+  khiến setAutoCommit(false) có side effect nguy hiểm.
+- Không dùng dynamic SQL với allowedFields (Entry #009): Nguy cơ SQL Injection, phức tạp
+  hơn mức cần cho 2 use case cố định.
+- Không thêm cột is_deleted (Entry #010): Chi phí ALTER TABLE và update nhiều query quá cao
+  so với giải pháp soft delete qua users.status.
 ```
 
 ### 9.3. Em/nhóm đã kiểm tra tính đúng đắn của kết quả AI như thế nào?
 
 ```text
-
+Chạy thử trực tiếp trên DB test, đối chiếu với Java SE Documentation gốc (Entry #004),
+cross-check bằng kiến thức bảo mật (Entry #006), review code sau khi apply fix để phát hiện
+lỗi pattern lặp lại (Entry #007), và so sánh gợi ý AI với schema thực tế của project trước
+khi áp dụng (Entry #010).
 ```
 
 ### 9.4. Nếu không có AI, phần nào sẽ khó khăn nhất?
 
 ```text
-
+Phần khó nhất sẽ là debug lỗi JOIN chain sai bảng trung gian (Entry #007) — lỗi không gây
+exception, chỉ trả về NULL data nên rất khó phát hiện nguyên nhân gốc rễ nếu không có AI
+phân tích cấu trúc JOIN. Ngoài ra, việc liệt kê đầy đủ các approach cho transaction/rollback
+(Entry #008) cũng sẽ mất nhiều thời gian nghiên cứu tài liệu hơn.
 ```
 
 ### 9.5. Sau bài tập/project này, em/nhóm học được gì về môn học?
 
 ```text
-
+Học được rằng thiết kế DAO layer không chỉ là viết SQL đúng mà còn cần tính đến: quy mô
+project, kiến trúc hiện có (DBContext, shared connection), data integrity (FK constraint,
+atomic operations), và security (PreparedStatement, authorization). Mỗi quyết định kiến
+trúc đều có trade-off cần cân nhắc theo context thực tế, không theo lý thuyết đơn thuần.
 ```
 
 ### 9.6. Sau bài tập/project này, em/nhóm học được gì về cách sử dụng AI có trách nhiệm?
 
 ```text
-
+AI luôn đưa ra gợi ý dựa trên "best practice" chung mà không biết context cụ thể của project.
+Trách nhiệm của developer là: (1) Filter gợi ý theo quy mô và công nghệ thực tế, (2) Verify
+các API quan trọng qua documentation gốc, (3) Đặc biệt thận trọng với gợi ý liên quan đến
+bảo mật — AI có thể sai về security (Hallucination #2), (4) Khi AI fix một bug, tự scan toàn
+bộ codebase để tìm lỗi pattern tương tự thay vì chỉ áp dụng fix được cung cấp.
 ```
 
 ---
