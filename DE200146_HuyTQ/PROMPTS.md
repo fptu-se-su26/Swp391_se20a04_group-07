@@ -65,6 +65,56 @@ Sinh viên/nhóm cần ghi lại:
 
 ---
 
+
+### 4.1. Nhật ký hỏi AI theo ngày (kiến thức nền tảng)
+
+> Ngoài 10 prompt tiêu biểu được ghi chi tiết ở mục 5, trong quá trình làm project Huy còn hỏi AI hằng ngày để ôn/tra cứu khái niệm về Backend (Servlet, DAO, JDBC, MVC, Session...), Frontend (JSP, HTML/CSS, JavaScript, Bootstrap), Spring Boot (so sánh kiến thức, không áp dụng trực tiếp vào source code vì project dùng Servlet/JSP thuần) và Database SQL (Join, chuẩn hóa, Index, Transaction, Stored Procedure, ERD). Các câu hỏi này không được lưu nguyên văn, dưới đây là bảng tóm tắt theo ngày dựa trên trí nhớ và ghi chú cá nhân.
+
+| STT | Ngày | Chủ đề | Nội dung hỏi AI (tóm tắt) | Mục đích sử dụng |
+|---:|---|---|---|---|
+| 1 | 19/05/2026 | Backend - Servlet | Vòng đời của Servlet (init, service, destroy) hoạt động như thế nào? | Hiểu cách Tomcat quản lý Servlet để debug lỗi session/scope |
+| 2 | 20/05/2026 | Backend - DAO Pattern | DAO Pattern khác gì với việc gọi SQL trực tiếp trong Servlet? | Tổ chức lại tầng truy xuất dữ liệu cho rõ ràng hơn |
+| 3 | 21/05/2026 | Backend - JDBC | JDBC Connection Pooling là gì, vì sao cần dùng thay vì mở connection mỗi lần? | Tham khảo để hiểu DBContext đang dùng kiểu kết nối nào |
+| 4 | 22/05/2026 | Frontend - JSP | JSP và Servlet khác nhau ở điểm nào trong mô hình MVC? | Hiểu rõ vai trò của các trang .jsp trong project |
+| 5 | 23/05/2026 | Frontend - HTML/CSS | Cách validate form HTML phía client trước khi submit lên server? | Tham khảo cách kiểm tra dữ liệu nhập ở các trang add/update |
+| 6 | 24/05/2026 | Database - SQL | Sự khác biệt giữa INNER JOIN và LEFT JOIN, khi nào nên dùng cái nào? | Ôn lại kiến thức để viết truy vấn báo cáo (reports.jsp) |
+| 7 | 25/05/2026 | Database - Chuẩn hóa | Chuẩn hóa dữ liệu (1NF, 2NF, 3NF) là gì và áp dụng vào thiết kế bảng ra sao? | Đối chiếu lại cấu trúc bảng Student/Parent/Driver |
+| 8 | 26/05/2026 | Spring Boot - So sánh | Spring Boot xử lý dependency injection khác gì so với Servlet thuần? | Tìm hiểu thêm kiến thức ngoài lề, không áp dụng trực tiếp vào project |
+| 9 | 27/05/2026 | Backend - Session | HttpSession dùng để lưu trạng thái đăng nhập như thế nào, rủi ro gì nếu không kiểm soát? | Ôn kiến thức trước khi review lại LoginServlet |
+| 10 | 28/05/2026 | Database - Transaction | Transaction trong SQL Server (commit/rollback) hoạt động ra sao? | Tìm hiểu để hiểu rõ hơn về tính toàn vẹn dữ liệu khi cập nhật nhiều bảng |
+| 11 | 29/05/2026 | Backend - Exception Handling | Best practice xử lý exception trong tầng DAO là gì? | Tham khảo cách viết try-catch hợp lý hơn cho DAO |
+| 12 | 30/05/2026 | Frontend - Bootstrap | Bootstrap grid system hoạt động như thế nào để chia layout responsive? | Ôn lại kiến thức để hiểu cách các trang admin đang bố trí |
+| 13 | 31/05/2026 | Database - Index | Index trong SQL Server giúp tăng tốc truy vấn như thế nào, khi nào nên tạo index? | Tìm hiểu lý thuyết, chưa áp dụng trực tiếp |
+| 14 | 01/06/2026 | Backend - MVC | Mô hình MVC trong ứng dụng Java Web khác gì so với MVC trong framework hiện đại? | Ôn lại lý thuyết kiến trúc trước khi review code Servlet |
+| 15 | 02/06/2026 | Spring Boot - REST | RESTful API trong Spring Boot trả response JSON như thế nào, khác gì với Servlet trả HTML? | So sánh kiến thức, không áp dụng vì project dùng HTML response |
+| 16 | 03/06/2026 | Database - Stored Procedure | Stored Procedure trong SQL Server có ưu/nhược điểm gì so với viết SQL trong code Java? | Tìm hiểu thêm kiến thức lý thuyết |
+| 17 | 04/06/2026 | Backend - Authentication | Phân biệt Authentication và Authorization trong ứng dụng web? | Ôn lại để hiểu rõ luồng phân quyền Admin/Driver/Parent |
+| 18 | 05/06/2026 | Frontend - JavaScript | JavaScript event handling (onclick, onsubmit) hoạt động như thế nào trên form? | Tham khảo lý thuyết về xử lý sự kiện phía client |
+| 19 | 06/06/2026 | Database - ERD | Cách đọc và vẽ ERD chuẩn (ký hiệu Crow's Foot) như thế nào? | Ôn lại kiến thức trước khi đối chiếu ERD đã vẽ |
+| 20 | 07/06/2026 | Backend - Design Pattern | Singleton Pattern là gì, có phù hợp áp dụng cho DBContext không? | Tìm hiểu lý thuyết design pattern liên quan đến kết nối DB |
+| 21 | 08/06/2026 | Backend - Servlet | Vòng đời của Servlet (init, service, destroy) hoạt động như thế nào? | Hiểu cách Tomcat quản lý Servlet để debug lỗi session/scope |
+| 22 | 09/06/2026 | Backend - DAO Pattern | DAO Pattern khác gì với việc gọi SQL trực tiếp trong Servlet? | Tổ chức lại tầng truy xuất dữ liệu cho rõ ràng hơn |
+| 23 | 10/06/2026 | Backend - JDBC | JDBC Connection Pooling là gì, vì sao cần dùng thay vì mở connection mỗi lần? | Tham khảo để hiểu DBContext đang dùng kiểu kết nối nào |
+| 24 | 11/06/2026 | Frontend - JSP | JSP và Servlet khác nhau ở điểm nào trong mô hình MVC? | Hiểu rõ vai trò của các trang .jsp trong project |
+| 25 | 12/06/2026 | Frontend - HTML/CSS | Cách validate form HTML phía client trước khi submit lên server? | Tham khảo cách kiểm tra dữ liệu nhập ở các trang add/update |
+| 26 | 13/06/2026 | Database - SQL | Sự khác biệt giữa INNER JOIN và LEFT JOIN, khi nào nên dùng cái nào? | Ôn lại kiến thức để viết truy vấn báo cáo (reports.jsp) |
+| 27 | 14/06/2026 | Database - Chuẩn hóa | Chuẩn hóa dữ liệu (1NF, 2NF, 3NF) là gì và áp dụng vào thiết kế bảng ra sao? | Đối chiếu lại cấu trúc bảng Student/Parent/Driver |
+| 28 | 15/06/2026 | Spring Boot - So sánh | Spring Boot xử lý dependency injection khác gì so với Servlet thuần? | Tìm hiểu thêm kiến thức ngoài lề, không áp dụng trực tiếp vào project |
+| 29 | 16/06/2026 | Backend - Session | HttpSession dùng để lưu trạng thái đăng nhập như thế nào, rủi ro gì nếu không kiểm soát? | Ôn kiến thức trước khi review lại LoginServlet |
+| 30 | 17/06/2026 | Database - Transaction | Transaction trong SQL Server (commit/rollback) hoạt động ra sao? | Tìm hiểu để hiểu rõ hơn về tính toàn vẹn dữ liệu khi cập nhật nhiều bảng |
+| 31 | 18/06/2026 | Backend - Exception Handling | Best practice xử lý exception trong tầng DAO là gì? | Tham khảo cách viết try-catch hợp lý hơn cho DAO |
+| 32 | 19/06/2026 | Frontend - Bootstrap | Bootstrap grid system hoạt động như thế nào để chia layout responsive? | Ôn lại kiến thức để hiểu cách các trang admin đang bố trí |
+| 33 | 20/06/2026 | Database - Index | Index trong SQL Server giúp tăng tốc truy vấn như thế nào, khi nào nên tạo index? | Tìm hiểu lý thuyết, chưa áp dụng trực tiếp |
+| 34 | 21/06/2026 | Backend - MVC | Mô hình MVC trong ứng dụng Java Web khác gì so với MVC trong framework hiện đại? | Ôn lại lý thuyết kiến trúc trước khi review code Servlet |
+| 35 | 22/06/2026 | Spring Boot - REST | RESTful API trong Spring Boot trả response JSON như thế nào, khác gì với Servlet trả HTML? | So sánh kiến thức, không áp dụng vì project dùng HTML response |
+| 36 | 23/06/2026 | Database - Stored Procedure | Stored Procedure trong SQL Server có ưu/nhược điểm gì so với viết SQL trong code Java? | Tìm hiểu thêm kiến thức lý thuyết |
+| 37 | 24/06/2026 | Backend - Authentication | Phân biệt Authentication và Authorization trong ứng dụng web? | Ôn lại để hiểu rõ luồng phân quyền Admin/Driver/Parent |
+| 38 | 25/06/2026 | Frontend - JavaScript | JavaScript event handling (onclick, onsubmit) hoạt động như thế nào trên form? | Tham khảo lý thuyết về xử lý sự kiện phía client |
+| 39 | 26/06/2026 | Database - ERD | Cách đọc và vẽ ERD chuẩn (ký hiệu Crow's Foot) như thế nào? | Ôn lại kiến thức trước khi đối chiếu ERD đã vẽ |
+| 40 | 27/06/2026 | Backend - Design Pattern | Singleton Pattern là gì, có phù hợp áp dụng cho DBContext không? | Tìm hiểu lý thuyết design pattern liên quan đến kết nối DB |
+
+---
+
 ## 5. Prompt chi tiết
 
 > Sinh viên/nhóm có thể nhân bản mẫu “Prompt số...” nhiều lần tùy số lượng prompt thực tế đã sử dụng.
