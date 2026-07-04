@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "expo-auth-session": "^57.0.1",
+    "expo-crypto": "^57.0.0",
+    "expo-web-browser": "^57.0.0",
+    "google-auth-library": "^10.7.0",
+    "jsonwebtoken": "^9.0.3",
+    "react": "19.2.3",
+    "react-native": "0.86.0"
+  }
+}
