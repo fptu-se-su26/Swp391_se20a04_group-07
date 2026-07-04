@@ -35,7 +35,12 @@ Reflection cần thể hiện:
 Mô tả ngắn gọn quá trình sử dụng AI trong bài tập/project này.
 
 ```text
-Viết tại đây...
+Trong suốt quá trình làm project (19/05 - 27/06/2026), AI được sử dụng theo hai cách:
+
+1. Hỗ trợ trực tiếp cho từng giai đoạn cụ thể (phân tích yêu cầu, thiết kế database/ERD, gợi ý giao diện, rà soát rủi ro bảo mật, viết test case, chuẩn bị báo cáo/slide) - các lần này được ghi chi tiết trong AI_AUDIT_LOG.md và PROMPTS.md.
+2. Hỏi AI hằng ngày để ôn lại hoặc tra cứu kiến thức nền tảng về Backend (Servlet, DAO, JDBC, MVC, Session, Authentication...), Frontend (JSP, HTML/CSS, JavaScript, Bootstrap), Spring Boot (chủ yếu để so sánh kiến thức, không áp dụng trực tiếp vì project dùng Servlet/JSP thuần, không phải Spring Boot) và Database SQL (Join, chuẩn hóa, Index, Transaction, Stored Procedure, ERD). Phần này không gắn với một commit/file cụ thể nên không lưu nguyên văn hội thoại, chỉ ghi tóm tắt theo ngày trong AI_AUDIT_LOG.md (mục 4b).
+
+Công cụ dùng nhiều nhất là ChatGPT, vì phù hợp cho việc hỏi - đáp kiến thức nhanh. Claude được dùng nhiều hơn ở các phần cần phân tích sâu hơn (database, security, test case).
 ```
 
 Gợi ý:
