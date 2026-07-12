@@ -9,12 +9,33 @@ import toast from 'react-hot-toast';
 const busIcon  = L.divIcon({ className:'', html:'<div style="font-size:32px;filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.3))">🚌</div>', iconSize:[36,36], iconAnchor:[18,18] });
 const stopIcon = L.divIcon({ className:'', html:'<div style="font-size:20px">📍</div>', iconSize:[24,24], iconAnchor:[12,12] });
 
+// ✅ Guard: chỉ FlyTo khi tọa độ hợp lệ
 function FlyToMarker({ position }) {
   const map = useMap();
-  useEffect(() => { if (position) map.flyTo(position, 16, { duration: 1 }); }, [position]);
+  useEffect(() => {
+    if (
+      position &&
+      Array.isArray(position) &&
+      position.length === 2 &&
+      typeof position[0] === 'number' && !isNaN(position[0]) &&
+      typeof position[1] === 'number' && !isNaN(position[1])
+    ) {
+      map.flyTo(position, 16, { duration: 1 });
+    }
+  }, [position]);
   return null;
 }
 
+// ✅ Kiểm tra tọa độ hợp lệ
+const isValidLatLng = (pos) =>
+  pos &&
+  Array.isArray(pos) &&
+  pos.length === 2 &&
+  typeof pos[0] === 'number' && !isNaN(pos[0]) && pos[0] !== 0 &&
+  typeof pos[1] === 'number' && !isNaN(pos[1]) && pos[1] !== 0;
+
+// ✅ Default center: TP.Đà Nẵng
+const DEFAULT_CENTER = [16.0544, 108.2022];
 export default function ParentTracking() {
   const socket = useSocket();
   const [children, setChildren]   = useState([]);
@@ -26,7 +47,10 @@ export default function ParentTracking() {
 
   useEffect(() => {
     parentApi.getChildren()
-      .then(r => { setChildren(r.data.data); if (r.data.data[0]) setSelected(r.data.data[0]); })
+      .then(r => {
+        setChildren(r.data.data);
+        if (r.data.data[0]) setSelected(r.data.data[0]);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -40,8 +64,16 @@ export default function ParentTracking() {
         if (!r.data.data) return;
         const { trip, lastLocation } = r.data.data;
         setTripData(trip);
-        if (lastLocation) setBusPos([lastLocation.latitude, lastLocation.longitude]);
-        // Subscribe socket room
+
+        // ✅ Validate tọa độ trước khi set
+        if (
+          lastLocation &&
+          lastLocation.latitude  && !isNaN(+lastLocation.latitude) &&
+          lastLocation.longitude && !isNaN(+lastLocation.longitude)
+        ) {
+          setBusPos([+lastLocation.latitude, +lastLocation.longitude]);
+        }
+
         if (socket && trip) {
           if (watchingTrip.current) socket.emit('client:unwatch_trip', { tripId: watchingTrip.current });
           socket.emit('client:watch_trip', { tripId: trip.id });
@@ -53,16 +85,27 @@ export default function ParentTracking() {
   useEffect(() => {
     if (!socket) return;
     socket.on('bus:location', ({ tripId, latitude, longitude }) => {
-      if (tripData?.id === tripId) setBusPos([latitude, longitude]);
+      if (tripData?.id === tripId) {
+        // ✅ Validate trước khi update
+        const lat = +latitude;
+        const lng = +longitude;
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+          setBusPos([lat, lng]);
+        }
+      }
     });
     socket.on('notification:new', (notif) => toast(notif.title, { icon: '🔔', duration: 5000 }));
-    return () => { socket.off('bus:location'); socket.off('notification:new'); };
+    return () => {
+      socket.off('bus:location');
+      socket.off('notification:new');
+    };
   }, [socket, tripData]);
 
   if (loading) return <LoadingScreen />;
 
   const stops = tripData?.Route?.RouteStops || [];
-  const defaultCenter = busPos || [10.7769, 106.7009];
+  // ✅ Center an toàn: dùng busPos nếu hợp lệ, fallback về DEFAULT_CENTER
+  const mapCenter = isValidLatLng(busPos) ? busPos : DEFAULT_CENTER;
 
   return (
     <div>
@@ -74,7 +117,9 @@ export default function ParentTracking() {
           {children.map(c => (
             <button key={c.id} onClick={() => setSelected(c)}
               className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all
-                ${selected?.id === c.id ? 'bg-primary-600 text-white border-primary-600 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:border-primary-300'}`}>
+                ${selected?.id === c.id
+                  ? 'bg-primary-600 text-white border-primary-600 shadow-md'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-primary-300'}`}>
               👨‍🎓 {c.full_name}
             </button>
           ))}
@@ -84,9 +129,18 @@ export default function ParentTracking() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Map */}
         <div className="lg:col-span-2 rounded-2xl overflow-hidden shadow-md border" style={{ height: '450px' }}>
-          <MapContainer center={defaultCenter} zoom={14} style={{ height: '100%', width: '100%' }}>
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="© OpenStreetMap contributors" />
-            {busPos && (
+          <MapContainer
+            center={mapCenter}
+            zoom={14}
+            style={{ height: '100%', width: '100%' }}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="© OpenStreetMap contributors"
+            />
+
+            {/* ✅ Chỉ render Marker/Circle khi busPos hợp lệ */}
+            {isValidLatLng(busPos) && (
               <>
                 <Marker position={busPos} icon={busIcon}>
                   <Popup>
@@ -98,11 +152,22 @@ export default function ParentTracking() {
                 <FlyToMarker position={busPos} />
               </>
             )}
-            {stops.map(s => s.latitude && (
-              <Marker key={s.id} position={[parseFloat(s.latitude), parseFloat(s.longitude)]} icon={stopIcon}>
-                <Popup><div className="text-xs"><strong>{s.stop_name}</strong><br/>{s.address}</div></Popup>
-              </Marker>
-            ))}
+
+            {/* Route stops */}
+            {stops.map(s => {
+              const lat = parseFloat(s.latitude);
+              const lng = parseFloat(s.longitude);
+              if (isNaN(lat) || isNaN(lng)) return null;
+              return (
+                <Marker key={s.id} position={[lat, lng]} icon={stopIcon}>
+                  <Popup>
+                    <div className="text-xs">
+                      <strong>{s.stop_name}</strong><br/>{s.address}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
           </MapContainer>
         </div>
 
@@ -113,7 +178,9 @@ export default function ParentTracking() {
               <div className="card bg-green-50 border-green-200">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
-                  <span className="font-medium text-green-700 text-sm">Đang cập nhật live</span>
+                  <span className="font-medium text-green-700 text-sm">
+                    {isValidLatLng(busPos) ? 'Đang cập nhật live' : 'Chờ tín hiệu GPS...'}
+                  </span>
                 </div>
                 <p className="text-sm font-semibold">{tripData.Route?.route_name}</p>
                 <p className="text-xs text-gray-500 mt-1">👨‍✈️ {tripData.driver?.full_name}</p>
@@ -123,7 +190,7 @@ export default function ParentTracking() {
                 </p>
               </div>
 
-              {/* Route stops */}
+              {/* Route stops list */}
               <div className="card">
                 <h4 className="font-medium text-sm text-gray-700 mb-2">Các điểm dừng</h4>
                 <div className="space-y-2">
@@ -148,12 +215,13 @@ export default function ParentTracking() {
                   {tripData.TripAttendances.map(att => (
                     <div key={att.id} className="text-sm">
                       <span className={`font-medium ${
-                        att.status === 'boarded' ? 'text-green-600' :
-                        att.status === 'absent'  ? 'text-red-600' : 'text-yellow-600'
+                        att.status === 'boarded'    ? 'text-green-600' :
+                        att.status === 'absent'     ? 'text-red-600'   :
+                        att.status === 'dropped_off'? 'text-blue-600'  : 'text-yellow-600'
                       }`}>
-                        {att.status === 'boarded' ? '✅ Đã lên xe' :
-                         att.status === 'absent'  ? '❌ Vắng mặt' :
-                         att.status === 'dropped_off' ? '🏠 Đã xuống xe' : '⏳ Đang chờ'}
+                        {att.status === 'boarded'    ? '✅ Đã lên xe' :
+                         att.status === 'absent'     ? '❌ Vắng mặt' :
+                         att.status === 'dropped_off'? '🏠 Đã xuống xe' : '⏳ Đang chờ'}
                       </span>
                     </div>
                   ))}

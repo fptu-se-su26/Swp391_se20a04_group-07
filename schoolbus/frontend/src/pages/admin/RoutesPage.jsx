@@ -23,6 +23,16 @@ const initForm = {
 
 const initStop = { stop_name: '', address: '', estimated_time: '', stop_order: 1 };
 
+// Tìm xe đang gán cho 1 tài xế (nếu có)
+function findVehicleByDriver(vehicles, driverId) {
+  return vehicles.find(v => v.driver?.id === driverId || v.current_driver_id === driverId);
+}
+
+// Tìm tuyến khác (không phải tuyến đang sửa) mà tài xế này đã được phân công
+function findConflictRoute(routes, driverId, excludeRouteId) {
+  return routes.find(r => r.driver_id === driverId && r.id !== excludeRouteId);
+}
+
 export default function RoutesPage() {
   const [routes,   setRoutes]   = useState([]);
   const [drivers,  setDrivers]  = useState([]);
@@ -230,12 +240,32 @@ export default function RoutesPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Tài xế</label>
             <select className="input" value={form.driver_id}
-              onChange={e => setForm(f => ({ ...f, driver_id: e.target.value }))}>
+              onChange={e => {
+                const driverId = e.target.value;
+                const matchedVehicle = driverId ? findVehicleByDriver(vehicles, driverId) : null;
+                setForm(f => ({
+                  ...f,
+                  driver_id: driverId,
+                  // Tự động chọn xe đã gán cho tài xế này (nếu có), giữ nguyên nếu không tìm thấy
+                  vehicle_id: matchedVehicle ? matchedVehicle.id : f.vehicle_id,
+                }));
+              }}>
               <option value="">— Chưa phân công —</option>
-              {drivers.map(d => (
-                <option key={d.id} value={d.id}>🚌 {d.full_name} · {d.phone}</option>
-              ))}
+              {drivers.map(d => {
+                const conflict = findConflictRoute(routes, d.id, selected?.id);
+                return (
+                  <option key={d.id} value={d.id}>
+                    🚌 {d.full_name} · {d.phone}
+                    {conflict ? ` ⚠️ (đã phân công tuyến "${conflict.route_name}")` : ''}
+                  </option>
+                );
+              })}
             </select>
+            {form.driver_id && findConflictRoute(routes, form.driver_id, selected?.id) && (
+              <p className="text-xs text-amber-600 mt-1">
+                ⚠️ Tài xế này đang phụ trách tuyến "{findConflictRoute(routes, form.driver_id, selected?.id).route_name}". Gán vào tuyến này sẽ không tự động gỡ khỏi tuyến kia.
+              </p>
+            )}
           </div>
 
           {/* Xe */}

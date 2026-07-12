@@ -194,16 +194,27 @@ const LocationLog = sequelize.define('LocationLog', {
 }, { tableName: 'LocationLogs', timestamps: false });
 
 // ── Notification ──────────────────────────────────────────────
+// Thay thế nguyên khối định nghĩa Notification hiện tại (dòng 197-207) bằng khối này.
 const Notification = sequelize.define('Notification', {
-  id:        { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  user_id:   { type: DataTypes.UUID, allowNull: false },
-  user_type: { type: DataTypes.STRING(20), allowNull: false },
-  type:      DataTypes.STRING(100),
-  title:     DataTypes.STRING(200),
-  body:      DataTypes.TEXT,
-  data:      DataTypes.TEXT,
-  is_read:   { type: DataTypes.BOOLEAN, defaultValue: false },
-  sent_at:   { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  id:          { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+  user_id:     { type: DataTypes.UUID, allowNull: false },
+  user_type:   { type: DataTypes.STRING(20), allowNull: false },
+  type:        DataTypes.STRING(100),
+  title:       DataTypes.STRING(200),
+  body:        DataTypes.TEXT,
+  data:        DataTypes.TEXT,
+  is_read:     { type: DataTypes.BOOLEAN, defaultValue: false },
+  sent_at:     { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+
+  // ── Bổ sung mới cho tính năng gửi thông báo theo đối tượng ──
+  priority:    { type: DataTypes.STRING(20), defaultValue: 'normal' }, // normal | important | urgent
+  pinned:      { type: DataTypes.BOOLEAN, defaultValue: false },
+  sender_id:   DataTypes.UUID,
+  sender_name: DataTypes.STRING(100),
+  sender_role: DataTypes.STRING(20),   // admin | manager
+  target_role: DataTypes.STRING(20),   // driver | student | parent | all
+  batch_id:    DataTypes.UUID,         // nhóm các bản ghi cùng 1 lần gửi
+  recalled_at: DataTypes.DATE,
 }, { tableName: 'Notifications', timestamps: false });
 
 // ── Incident ──────────────────────────────────────────────────
@@ -304,6 +315,10 @@ TripAttendance.belongsTo(RouteStop, { foreignKey: 'stop_id',    as: 'stop'    })
 
 Invoice.belongsTo(Student,     { foreignKey: 'student_id', as: 'student' });
 Invoice.belongsTo(PaymentPlan, { foreignKey: 'plan_id' });
+
+// AbsentRequest ↔ Student — cần để Admin/Manager include Tên/Lớp/Mã HS/Phụ huynh
+AbsentRequest.belongsTo(Student, { foreignKey: 'student_id', as: 'student' });
+Student.hasMany(AbsentRequest,   { foreignKey: 'student_id' });
 
 // ============================================================
 // EXPORTS

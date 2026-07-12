@@ -7,5 +7,8 @@
     "jsonwebtoken": "^9.0.3",
     "react": "19.2.3",
     "react-native": "0.86.0"
+  },
+  "devDependencies": {
+    "babel-plugin-module-resolver": "^5.0.3"
   }
 }

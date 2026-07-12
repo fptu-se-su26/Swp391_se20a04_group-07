@@ -1,9 +1,10 @@
 const {
   Student, ClassRoom, Trip, TripAttendance, Route, RouteStop, RouteSubscription,
-  UserDriver, AbsentRequest, Invoice, Notification, Feedback, LocationLog, sequelize
+  UserDriver, UserManager, UserAdmin, AbsentRequest, Invoice, Notification, Feedback, LocationLog, sequelize
 } = require('../../models');
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require('sequelize');
+const { getIO } = require('../../utils/socketRegistry');
 
 const PARENT_PREFIX = 'parent_';
 
@@ -129,10 +130,64 @@ class ParentService {
     const ownStudentId = this._checkParent(parentId, studentId);
     // AbsentRequest.parent_id is a UUID column — store the student's own id (see Invoice pattern
     // in other.routes.js generate-invoices), never the "parent_<uuid>" token string.
-    return AbsentRequest.create({
+    const request = await AbsentRequest.create({
       id: uuidv4(), student_id: studentId, parent_id: ownStudentId,
       absent_date: absentDate, trip_type: tripType, reason, status: 'approved'
     });
+
+    // Thông báo cho Admin + Manager. Không throw nếu bước này lỗi (mạng, DB tạm thời...)
+    // để không chặn việc phụ huynh gửi đơn — chỉ log lại để điều tra sau.
+    try {
+      await this._notifyAbsentRequest(request, studentId, absentDate, reason);
+    } catch (err) {
+      console.error('createAbsentRequest: gửi thông báo cho Admin/Manager thất bại:', err.message);
+    }
+
+    return request;
+  }
+
+  // ── Tạo Notification cho toàn bộ Admin + Manager đang active ─
+  async _notifyAbsentRequest(request, studentId, absentDate, reason) {
+    const student = await Student.findByPk(studentId, {
+      attributes: ['student_id', 'full_name'],
+      include: [{ model: ClassRoom, as: 'classInfo', attributes: ['class_name'], required: false }],
+    });
+
+    const studentLabel = student
+      ? `${student.full_name} (${student.student_id}${student.classInfo ? ' - Lớp ' + student.classInfo.class_name : ''})`
+      : 'Một học sinh';
+
+    const title = '📋 Đơn xin vắng học mới';
+    const body  = `${studentLabel} xin nghỉ ngày ${absentDate}${reason ? ': ' + reason : ''}`;
+    const data  = JSON.stringify({ absentRequestId: request.id, studentId, absentDate });
+
+    const [managers, admins] = await Promise.all([
+      UserManager.findAll({ where: { is_active: true }, attributes: ['id'] }),
+      UserAdmin.findAll({ where: { is_active: true }, attributes: ['id'] }),
+    ]);
+
+    const notifs = [
+      ...managers.map(m => ({
+        id: uuidv4(), user_id: m.id, user_type: 'manager',
+        type: 'absent_request', title, body, data,
+      })),
+      ...admins.map(a => ({
+        id: uuidv4(), user_id: a.id, user_type: 'admin',
+        type: 'absent_request', title, body, data,
+      })),
+    ];
+
+    if (notifs.length > 0) await Notification.bulkCreate(notifs);
+
+    // Đẩy real-time cho chuông thông báo trên thanh điều hướng Admin/Manager.
+    // Không throw nếu socket chưa sẵn sàng (vd server vừa khởi động) —
+    // Notification đã lưu DB rồi nên phía FE vẫn thấy khi tải lại trang.
+    const io = getIO();
+    if (io) {
+      const payload = { title, body, type: 'absent_request', data: JSON.parse(data), sentAt: new Date() };
+      io.to('role:admin').emit('notification:new', payload);
+      io.to('role:manager').emit('notification:new', payload);
+    }
   }
 
   async getAbsentRequests(parentId) {
