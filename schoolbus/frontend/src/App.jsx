@@ -17,6 +17,8 @@ const AdminVehicles  = lazy(() => import('./pages/admin/Vehicles'));
 const AdminRoutes    = lazy(() => import('./pages/admin/RoutesPage'));
 const AdminIncidents = lazy(() => import('./pages/admin/Incidents'));
 const AdminReport    = lazy(() => import('./pages/admin/Report'));
+const AdminAbsentRequests = lazy(() => import('./pages/admin/AbsentRequests'));
+const AdminNotifications  = lazy(() => import('./pages/admin/Notifications'));
 
 // Manager
 const ManagerLayout    = lazy(() => import('./pages/manager/ManagerLayout'));
@@ -24,12 +26,15 @@ const ManagerDashboard = lazy(() => import('./pages/manager/Dashboard'));
 const ManagerTrips     = lazy(() => import('./pages/manager/Trips'));
 const ManagerFleet     = lazy(() => import('./pages/manager/Fleet'));
 const ManagerPayments  = lazy(() => import('./pages/manager/Payments'));
+const ManagerAbsentRequests = lazy(() => import('./pages/manager/AbsentRequests'));
+const ManagerNotifications  = lazy(() => import('./pages/manager/Notifications'));
 
 // Driver
-const DriverLayout  = lazy(() => import('./pages/driver/DriverLayout'));
-const DriverTrips   = lazy(() => import('./pages/driver/Trips'));
-const DriverActive  = lazy(() => import('./pages/driver/ActiveTrip'));
-const DriverHistory = lazy(() => import('./pages/driver/History'));
+const DriverLayout       = lazy(() => import('./pages/driver/DriverLayout'));
+const DriverTrips        = lazy(() => import('./pages/driver/Trips'));
+const DriverActive       = lazy(() => import('./pages/driver/ActiveTrip'));
+const DriverHistory      = lazy(() => import('./pages/driver/History'));
+const DriverNotifications= lazy(() => import('./pages/driver/Notifications'));
 
 // Parent
 const ParentLayout        = lazy(() => import('./pages/parent/ParentLayout'));
@@ -41,9 +46,11 @@ const ParentAbsent        = lazy(() => import('./pages/parent/AbsentRequest'));
 const ParentNotifications = lazy(() => import('./pages/parent/Notifications'));
 
 // Student
-const StudentLayout  = lazy(() => import('./pages/student/StudentLayout'));
-const StudentHome    = lazy(() => import('./pages/student/Home'));
-const StudentBus     = lazy(() => import('./pages/student/BusTracker'));
+const StudentLayout       = lazy(() => import('./pages/student/StudentLayout'));
+const StudentHome         = lazy(() => import('./pages/student/Home'));
+const StudentSchedule     = lazy(() => import('./pages/student/Schedule'));
+const StudentBus          = lazy(() => import('./pages/student/BusTracker'));
+const StudentNotifications= lazy(() => import('./pages/student/Notifications'));
 
 // ── Guards ───────────────────────────────────────────────────
 const PageLoader = () => (
@@ -87,7 +94,9 @@ function AppRoutes() {
           <Route path="students" element={<AdminStudents />} />
           <Route path="vehicles" element={<AdminVehicles />} />
           <Route path="routes"   element={<AdminRoutes />} />
+          <Route path="absent-requests" element={<AdminAbsentRequests />} />
           <Route path="incidents"element={<AdminIncidents />} />
+          <Route path="notifications" element={<AdminNotifications />} />
           <Route path="reports"  element={<AdminReport />} />
         </Route>
 
@@ -96,6 +105,8 @@ function AppRoutes() {
           <Route index          element={<ManagerDashboard />} />
           <Route path="trips"    element={<ManagerTrips />} />
           <Route path="fleet"    element={<ManagerFleet />} />
+          <Route path="absent-requests" element={<ManagerAbsentRequests />} />
+          <Route path="notifications" element={<ManagerNotifications />} />
           <Route path="payments" element={<ManagerPayments />} />
         </Route>
 
@@ -104,6 +115,7 @@ function AppRoutes() {
           <Route index         element={<DriverTrips />} />
           <Route path="active" element={<DriverActive />} />
           <Route path="history"element={<DriverHistory />} />
+          <Route path="notifications" element={<DriverNotifications />} />
         </Route>
 
         {/* Parent */}
@@ -118,8 +130,10 @@ function AppRoutes() {
 
         {/* Student */}
         <Route path="/student" element={<ProtectedRoute roles={['student']}><StudentLayout /></ProtectedRoute>}>
-          <Route index     element={<StudentHome />} />
-          <Route path="bus"element={<StudentBus />} />
+          <Route index          element={<StudentHome />} />
+          <Route path="schedule"element={<StudentSchedule />} />
+          <Route path="bus"     element={<StudentBus />} />
+          <Route path="notifications" element={<StudentNotifications />} />
         </Route>
 
         <Route path="/unauthorized" element={

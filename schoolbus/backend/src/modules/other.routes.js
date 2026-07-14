@@ -10,6 +10,7 @@ const {
   Trip, Route, Vehicle, RouteStop,
   UserDriver,          // ← thay User
   Student,             // ← thay User as student
+  ClassRoom,
   TripAttendance, RouteSubscription,
   Invoice, PaymentPlan, Notification,
   Feedback, sequelize
@@ -203,7 +204,9 @@ const studentAuth = [verifyToken, authorizeRoles('student')];
 // ── Profile ───────────────────────────────────────────────────
 studentRouter.get('/profile', ...studentAuth, async (req, res, next) => {
   try {
-    const s = await Student.findByPk(req.user.id);
+    const s = await Student.findByPk(req.user.id, {
+      include: [{ model: ClassRoom, as: 'classInfo', attributes: ['id', 'class_name', 'grade'], required: false }],
+    });
     if (!s) return res.status(404).json({ success: false, message: 'Không tìm thấy học sinh' });
     res.json({ success: true, data: { ...s.toJSON(), role: 'student' } });
   } catch (e) { next(e); }
@@ -244,22 +247,31 @@ studentRouter.get('/trips/current', ...studentAuth, async (req, res, next) => {
 });
 
 // ── Week schedule ─────────────────────────────────────────────
+// Hỗ trợ điều hướng tuần: FE truyền ?date=YYYY-MM-DD (1 ngày bất kỳ
+// trong tuần muốn xem) → BE tính Thứ 2 -> Chủ Nhật của tuần chứa
+// ngày đó. Không truyền date → mặc định tuần hiện tại (VN timezone).
 studentRouter.get('/schedule/week', ...studentAuth, async (req, res, next) => {
   try {
-    // Tính thứ 2 và thứ 6 tuần này theo VN timezone
-    const now     = new Date(Date.now() + 7 * 60 * 60 * 1000);
-    const day     = now.getUTCDay(); // 0=CN
-    const monday  = new Date(now);
-    monday.setUTCDate(now.getUTCDate() - (day === 0 ? 6 : day - 1));
-    const friday  = new Date(monday);
-    friday.setUTCDate(monday.getUTCDate() + 4);
+    const anchor = req.query.date
+      ? new Date(`${req.query.date}T00:00:00.000Z`)
+      : new Date(Date.now() + 7 * 60 * 60 * 1000);
+
+    if (isNaN(anchor.getTime())) {
+      throw Object.assign(new Error('Tham số date không hợp lệ (định dạng YYYY-MM-DD)'), { status: 400 });
+    }
+
+    const day     = anchor.getUTCDay(); // 0=CN
+    const monday  = new Date(anchor);
+    monday.setUTCDate(anchor.getUTCDate() - (day === 0 ? 6 : day - 1));
+    const sunday  = new Date(monday);
+    sunday.setUTCDate(monday.getUTCDate() + 6);
 
     const mondayStr = monday.toISOString().split('T')[0];
-    const fridayStr = friday.toISOString().split('T')[0];
+    const sundayStr = sunday.toISOString().split('T')[0];
 
     const trips = await Trip.findAll({
       where: {
-        scheduled_date: { [Op.between]: [mondayStr, fridayStr] },
+        scheduled_date: { [Op.between]: [mondayStr, sundayStr] },
       },
       include: [
         { model: TripAttendance, where: { student_id: req.user.id }, required: true },
@@ -267,20 +279,56 @@ studentRouter.get('/schedule/week', ...studentAuth, async (req, res, next) => {
       ],
       order: [['scheduled_date','ASC'], ['scheduled_start','ASC']],
     });
-    res.json({ success: true, data: trips });
+    res.json({
+      success: true,
+      data: trips,
+      meta: { monday: mondayStr, sunday: sundayStr },
+    });
   } catch (e) { next(e); }
 });
 
-// ── Notifications ─────────────────────────────────────────────
+// ============================================================
+// THAY THẾ route studentRouter.get('/notifications', ...) hiện tại
+// trong other.routes.js bằng khối sau (thêm mark-read + phân trang):
+// ============================================================
+
 studentRouter.get('/notifications', ...studentAuth, async (req, res, next) => {
   try {
-    const notifs = await Notification.findAll({
-      where: { user_id: req.user.id, user_type: 'student' },
-      order: [['sent_at', 'DESC']],
-      limit: 50,
+    const page  = parseInt(req.query.page)  || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await Notification.findAndCountAll({
+      where: { user_id: req.user.id, user_type: 'student', recalled_at: null },
+      order: [['pinned', 'DESC'], ['sent_at', 'DESC']],
+      limit, offset,
     });
-    res.json({ success: true, data: notifs });
+    const unread = await Notification.count({
+      where: { user_id: req.user.id, user_type: 'student', is_read: false, recalled_at: null }
+    });
+    res.json({ success: true, data: { total: count, unread, data: rows } });
   } catch (e) { next(e); }
 });
+
+studentRouter.patch('/notifications/:id/read', ...studentAuth, async (req, res, next) => {
+  try {
+    await Notification.update(
+      { is_read: true },
+      { where: { id: req.params.id, user_id: req.user.id, user_type: 'student' } }
+    );
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+studentRouter.patch('/notifications/read-all', ...studentAuth, async (req, res, next) => {
+  try {
+    await Notification.update(
+      { is_read: true },
+      { where: { user_id: req.user.id, user_type: 'student', is_read: false } }
+    );
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
 
 module.exports = { managerRouter, studentRouter };

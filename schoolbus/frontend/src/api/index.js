@@ -42,7 +42,23 @@ export const adminApi = {
   resolveIncident: (id, note) => api.patch(`/admin/incidents/${id}/resolve`, { note }),
 
   getReport:       (params) => api.get('/admin/reports/attendance', { params }),
-  broadcast:       (data) => api.post('/admin/notifications/broadcast', data),
+
+  // Đơn xin vắng học
+  getAbsentRequests:   (params) => api.get('/admin/absent-requests', { params }),
+  getAbsentRequestById:(id) => api.get(`/admin/absent-requests/${id}`),
+
+  // Chuông thông báo của chính Admin/Manager đang đăng nhập
+  getMyNotifications:      (params) => api.get('/admin/notifications', { params }),
+  markNotificationRead:    (id) => api.patch(`/admin/notifications/${id}/read`),
+  markAllNotificationsRead:() => api.patch('/admin/notifications/read-all'),
+
+  // ── Gửi thông báo theo đối tượng (mới) ──
+  sendNotification:      ({ title, body, priority, targetRole }) =>
+    api.post('/admin/notifications/send', { title, body, priority, targetRole }),
+  getNotificationHistory:(params) => api.get('/admin/notifications/history', { params }),
+  recallNotification:    (batchId) => api.patch(`/admin/notifications/history/${batchId}/recall`),
+  editNotification:      (batchId, data) => api.put(`/admin/notifications/history/${batchId}`, data),
+  togglePinNotification: (batchId) => api.patch(`/admin/notifications/history/${batchId}/pin`),
 };
 
 // ============================================================
@@ -69,7 +85,13 @@ export const driverApi = {
   updateAttendance:    (tripId, studentId, data) => api.patch(`/driver/trips/${tripId}/attendance/${studentId}`, data),
   reportIncident:      (data) => api.post('/driver/incidents', data),
   getTripHistory:      (params) => api.get('/driver/trips/history', { params }),
+  getTripHistoryStats: () => api.get('/driver/trips/history/stats'),
   getPerformance:      () => api.get('/driver/performance'),
+
+  // ── Thông báo ──
+  getNotifications: (params) => api.get('/driver/notifications', { params }),
+  markRead:         (id) => api.patch(`/driver/notifications/${id}/read`),
+  markAllRead:      () => api.patch('/driver/notifications/read-all'),
 };
 
 // ============================================================
@@ -100,6 +122,10 @@ export const studentApi = {
   getProfile:      () => api.get('/student/profile'),
   getMyRoute:      () => api.get('/student/my-route'),
   getCurrentTrip:  () => api.get('/student/trips/current'),
-  getWeekSchedule: () => api.get('/student/schedule/week'),
-  getNotifications:() => api.get('/student/notifications'),
+  getWeekSchedule: (date) => api.get('/student/schedule/week', { params: date ? { date } : {} }),
+
+  // ── Thông báo ──
+  getNotifications: (params) => api.get('/student/notifications', { params }),
+  markRead:         (id) => api.patch(`/student/notifications/${id}/read`),
+  markAllRead:      () => api.patch('/student/notifications/read-all'),
 };

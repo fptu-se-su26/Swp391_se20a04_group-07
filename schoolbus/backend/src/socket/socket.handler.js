@@ -2,12 +2,17 @@ const { LocationLog, Trip, Notification, User } = require('../models');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../config/logger');
+const { setIO } = require('../utils/socketRegistry');
 
 // Map lưu socket theo userId
 const connectedUsers = new Map(); // userId -> socketId
 const activeTrips = new Map();    // tripId -> { driverSocketId, lat, lng }
 
 module.exports = (io) => {
+  // Đăng ký io để các service REST (parent.service.js, driver.service.js...)
+  // có thể emit sự kiện real-time (vd thông báo đơn xin vắng học mới).
+  setIO(io);
+
 
   // Middleware xác thực token khi connect
   io.use((socket, next) => {

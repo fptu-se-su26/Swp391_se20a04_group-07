@@ -10,7 +10,18 @@ router.get('/trips/today', ...auth, async (req, res, next) => {
 });
 
 router.get('/trips/history', ...auth, async (req, res, next) => {
-  try { res.json({ success: true, data: await driverService.getTripHistory(req.user.id, req.query.page, req.query.limit) }); } catch (e) { next(e); }
+  try {
+    const { page, limit, search, status, fromDate, toDate } = req.query;
+    res.json({
+      success: true,
+      data: await driverService.getTripHistory(req.user.id, { page, limit, search, status, fromDate, toDate })
+    });
+  } catch (e) { next(e); }
+});
+
+// ← THÊM MỚI: số liệu tổng quan cho trang Lịch sử chuyến (4 thẻ thống kê)
+router.get('/trips/history/stats', ...auth, async (req, res, next) => {
+  try { res.json({ success: true, data: await driverService.getTripHistoryStats(req.user.id) }); } catch (e) { next(e); }
 });
 
 router.get('/trips/:id', ...auth, async (req, res, next) => {
@@ -44,6 +55,28 @@ router.post('/incidents', ...auth, async (req, res, next) => {
 
 router.get('/performance', ...auth, async (req, res, next) => {
   try { res.json({ success: true, data: await driverService.getPerformance(req.user.id) }); } catch (e) { next(e); }
+});
+
+// ============================================================
+// NOTIFICATIONS — hộp thư thông báo của tài xế
+// ============================================================
+router.get('/notifications', ...auth, async (req, res, next) => {
+  try { res.json({ success: true, data: await driverService.getNotifications(req.user.id, req.query) }); }
+  catch (e) { next(e); }
+});
+
+router.patch('/notifications/:id/read', ...auth, async (req, res, next) => {
+  try {
+    await driverService.markNotificationRead(req.params.id, req.user.id);
+    res.json({ success: true });
+  } catch (e) { next(e); }
+});
+
+router.patch('/notifications/read-all', ...auth, async (req, res, next) => {
+  try {
+    await driverService.markAllNotificationsRead(req.user.id);
+    res.json({ success: true });
+  } catch (e) { next(e); }
 });
 
 module.exports = router;
