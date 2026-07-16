@@ -1,0 +1,15 @@
+import React from 'react';
+import { Sidebar, DashboardLayout } from '../../components/common';
+
+const links = [
+  { to: '/parent',               label: 'Tổng quan',    icon: '🏠', end: true },
+  { to: '/parent/tracking',      label: 'Theo dõi xe',  icon: '🗺️' },
+  { to: '/parent/attendance',    label: 'Điểm danh',    icon: '📋' },
+  { to: '/parent/absent',        label: 'Báo vắng',     icon: '📝' },
+  { to: '/parent/invoices',      label: 'Hóa đơn',      icon: '💰' },
+  { to: '/parent/notifications', label: 'Thông báo',    icon: '🔔' },
+];
+
+export default function ParentLayout() {
+  return <DashboardLayout sidebar={<Sidebar title="Phụ Huynh" links={links} roleColor="bg-yellow-800" />} />;
+}
