@@ -409,15 +409,11 @@ Gợi ý:
 
 ### 8.2. Em/nhóm đã học được gì về cách đặt câu hỏi cho AI?
 
-```text
-Viết tại đây...
-```
+Em/nhóm đã học được rằng việc đặt câu hỏi cho AI càng rõ ràng và chi tiết thì kết quả nhận được càng chính xác. Khi đặt câu hỏi, cần nêu rõ mục tiêu, ngữ cảnh, yêu cầu đầu ra và các ràng buộc cụ thể. Ngoài ra, có thể chia vấn đề lớn thành nhiều câu hỏi nhỏ để AI hỗ trợ hiệu quả hơn. Em/nhóm cũng nhận thấy cần kiểm tra và đánh giá lại thông tin do AI cung cấp thay vì sử dụng hoàn toàn mà không xác minh.
 
 ### 8.3. Lần sau em/nhóm sẽ cải thiện prompt như thế nào?
 
-```text
-Viết tại đây...
-```
+Lần sau, em/nhóm sẽ viết prompt cụ thể và chi tiết hơn, cung cấp đầy đủ ngữ cảnh, mục tiêu, định dạng kết quả mong muốn và các yêu cầu liên quan. Em/nhóm cũng sẽ chia các vấn đề phức tạp thành nhiều câu hỏi nhỏ để AI hiểu rõ hơn và đưa ra câu trả lời chính xác, phù hợp hơn.
 
 ---
 
