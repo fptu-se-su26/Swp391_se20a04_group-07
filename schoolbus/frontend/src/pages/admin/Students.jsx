@@ -84,7 +84,7 @@ export default function AdminStudents() {
       const a   = document.createElement('a');
       a.href = url; a.download = 'student_import_template.xlsx'; a.click();
       URL.revokeObjectURL(url);
-    } catch { toast.error('Không thể tải template'); }
+    } catch { toast.error('Không thể tải bản mẫu'); }
   };
 
   return (
@@ -97,10 +97,10 @@ export default function AdminStudents() {
         </div>
         <div className="flex gap-2">
           <button onClick={handleDownloadTemplate} className="btn-secondary text-sm flex items-center gap-1">
-            📥 Tải template Excel
+            📥 Tải bản mẫu Excel
           </button>
           <button onClick={() => setModal('import')} className="btn-secondary text-sm flex items-center gap-1">
-            📂 Import Excel
+            📂 Nhập Excel
           </button>
           <button onClick={() => { setSelected(null); setModal('add'); }} className="btn-primary flex items-center gap-1">
             + Thêm học sinh
@@ -236,7 +236,6 @@ function StudentFormModal({ student, classes, routes, onClose, onSaved }) {
     parent_gmail:  student?.parent_gmail  || '',
     home_address:  student?.home_address  || '',
     bus_route_id:  student?.bus_route_id  || '',
-    bus_stop_id:   student?.bus_stop_id   || '',
   });
   const [loading, setLoading] = useState(false);
   const [errors,  setErrors]  = useState({});
@@ -369,23 +368,15 @@ function StudentFormModal({ student, classes, routes, onClose, onSaved }) {
           {/* Xe buýt */}
           <div>
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">🚌 Đăng ký xe buýt</h4>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tuyến xe</label>
-                <select className="input" value={form.bus_route_id} onChange={e => set('bus_route_id', e.target.value)}>
-                  <option value="">-- Chưa đăng ký --</option>
-                  {routes.map(r => <option key={r.id} value={r.id}>{r.route_code} - {r.route_name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Điểm đón/trả</label>
-                <select className="input" value={form.bus_stop_id} onChange={e => set('bus_stop_id', e.target.value)}>
-                  <option value="">-- Chưa chọn --</option>
-                  {routes.find(r => r.id === form.bus_route_id)?.RouteStops?.map(s => (
-                    <option key={s.id} value={s.id}>{s.stop_name}</option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tuyến xe</label>
+              <select className="input" value={form.bus_route_id} onChange={e => set('bus_route_id', e.target.value)}>
+                <option value="">-- Chưa đăng ký --</option>
+                {routes.map(r => <option key={r.id} value={r.id}>{r.route_code} - {r.route_name}</option>)}
+              </select>
+              <p className="text-xs text-gray-400 mt-1">
+                Xe sẽ đón/trả học sinh tận nhà theo địa chỉ đã nhập ở trên, không cần chọn điểm dừng.
+              </p>
             </div>
           </div>
 
