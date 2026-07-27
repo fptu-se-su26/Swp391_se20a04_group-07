@@ -1,4 +1,4 @@
-# AI Audit Log
+# AI Audit Log - DE190390 Ngô Vương Tùng
 
 ## 1. Thông tin chung
 

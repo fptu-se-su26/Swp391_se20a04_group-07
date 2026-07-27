@@ -1,3 +1,4 @@
+// Parent routes configuration - DE190390 Ngo Vuong Tung
 const express = require('express');
 const router = express.Router();
 const parentService = require('./parent.service');
