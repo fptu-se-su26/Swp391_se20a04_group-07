@@ -79,6 +79,7 @@ export default function ParentAttendance() {
       {/* Records table */}
       {loading ? <LoadingScreen /> : (
         <div className="card p-0 overflow-hidden">
+        <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b">
@@ -104,6 +105,7 @@ export default function ParentAttendance() {
               )}
             </tbody>
           </table>
+        </div>
         </div>
       )}
     </div>

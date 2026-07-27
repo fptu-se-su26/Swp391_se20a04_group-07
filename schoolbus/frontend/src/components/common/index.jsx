@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth, useSocket } from '../../context';
 import { adminApi } from '../../api';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -90,12 +91,150 @@ export function Sidebar({ title, links, roleColor = 'bg-primary-800', notifBell 
 }
 
 // ============================================================
-// LAYOUT WRAPPER
+// MOBILE — DRAWER (menu trượt, hiện khi bấm ☰)
 // ============================================================
-export function DashboardLayout({ sidebar }) {
+function MobileDrawer({ open, onClose, title, links, user, onLogout }) {
+  return (
+    <div className={`fixed inset-0 z-[60] ${open ? '' : 'pointer-events-none'}`}>
+      {/* Lớp phủ tối */}
+      <div
+        onClick={onClose}
+        className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`}
+      />
+      {/* Panel trượt từ trái */}
+      <div
+        className={`absolute inset-y-0 left-0 w-72 max-w-[82%] bg-white shadow-2xl flex flex-col
+          transition-transform duration-300 ease-out ${open ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        <div className="px-4 py-4 bg-gray-900 text-white flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🚌</span>
+            <span className="font-bold">SchoolBus</span>
+          </div>
+          <p className="text-xs text-white/60 mt-0.5">{title}</p>
+        </div>
+
+        {user && (
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2 flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold flex-shrink-0">
+              {user?.full_name?.charAt(0) || 'U'}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-gray-800 truncate">{user?.full_name}</p>
+              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+            </div>
+          </div>
+        )}
+
+        <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
+          {links.map(link => (
+            <NavLink key={link.to} to={link.to} end={link.end} onClick={onClose}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
+                ${isActive ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-600 hover:bg-gray-50'}`
+              }>
+              <span className="text-lg flex-shrink-0">{link.icon}</span>
+              <span className="flex-1">{link.label}</span>
+              {link.badge > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">
+                  {link.badge > 9 ? '9+' : link.badge}
+                </span>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="p-2 border-t border-gray-100 flex-shrink-0">
+          <button onClick={onLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-600 text-sm transition-colors">
+            <span className="text-lg flex-shrink-0">🚪</span>
+            <span>Đăng xuất</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// MOBILE — APP SHELL (top bar + nội dung + bottom tab bar)
+// Giao diện riêng dành cho điện thoại: không dùng sidebar dọc
+// vì sẽ đè lên nội dung trên màn hình hẹp.
+// ============================================================
+function MobileLayout({ title, links, roleColor = 'bg-primary-900', notifBell = null }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
+  // Chỉ hiện tối đa 3 mục chính dưới thanh tab, phần còn lại vào menu "Thêm"
+  const tabLinks = links.slice(0, 3);
+
+  return (
+    <div className="flex flex-col h-[100dvh] bg-gray-50 overflow-hidden">
+      {/* Top bar */}
+      <header className={`flex items-center justify-between px-2 h-14 ${roleColor} text-white flex-shrink-0 shadow-sm z-40`}>
+        <button onClick={() => setDrawerOpen(true)} className="p-2.5 rounded-lg hover:bg-white/10 active:bg-white/20" aria-label="Mở menu">
+          <span className="text-xl leading-none">☰</span>
+        </button>
+        <span className="text-sm font-bold truncate px-1">{title}</span>
+        <div className="w-9 h-9 flex items-center justify-center">{notifBell}</div>
+      </header>
+
+      {/* Nội dung trang */}
+      <main className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="p-4 pb-6">
+          <Outlet />
+        </div>
+      </main>
+
+      {/* Bottom tab bar */}
+      <nav className="flex items-stretch bg-white border-t border-gray-200 flex-shrink-0 z-40"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        {tabLinks.map(link => (
+          <NavLink key={link.to} to={link.to} end={link.end}
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] transition-colors
+              ${isActive ? 'text-primary-700 font-medium' : 'text-gray-500'}`
+            }>
+            <span className="text-xl leading-none">{link.icon}</span>
+            <span className="truncate max-w-[70px]">{link.label}</span>
+          </NavLink>
+        ))}
+        <button onClick={() => setDrawerOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 text-[11px] text-gray-500 active:bg-gray-50">
+          <span className="text-xl leading-none">☰</span>
+          <span>Thêm</span>
+        </button>
+      </nav>
+
+      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)}
+        title={title} links={links} user={user} onLogout={handleLogout} />
+    </div>
+  );
+}
+
+// ============================================================
+// LAYOUT WRAPPER
+// PC: giữ nguyên giao diện Sidebar dọc như hiện tại.
+// Điện thoại: chuyển sang MobileLayout (top bar + bottom tab + drawer).
+// ============================================================
+export function DashboardLayout({ title, links, roleColor = 'bg-primary-800', notifBell = null, sidebar }) {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <MobileLayout title={title} links={links} roleColor={roleColor} notifBell={notifBell} />;
+  }
+
+  // Tương thích ngược: nếu trang cũ vẫn truyền sẵn `sidebar` (element),
+  // dùng luôn; nếu không, tự dựng Sidebar từ props mới.
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      {sidebar}
+      {sidebar || <Sidebar title={title} links={links} roleColor={roleColor} notifBell={notifBell} />}
       <main className="flex-1 overflow-y-auto">
         <div className="p-6">
           <Outlet />

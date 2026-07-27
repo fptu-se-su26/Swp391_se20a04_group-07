@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sidebar, DashboardLayout } from '../../components/common';
+import { DashboardLayout } from '../../components/common';
 
 const links = [
   { to: '/parent',               label: 'Tổng quan',    icon: '🏠', end: true },
@@ -11,5 +11,5 @@ const links = [
 ];
 
 export default function ParentLayout() {
-  return <DashboardLayout sidebar={<Sidebar title="Phụ Huynh" links={links} roleColor="bg-yellow-800" />} />;
+  return <DashboardLayout title="Phụ Huynh" links={links} roleColor="bg-yellow-800" />;
 }
