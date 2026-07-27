@@ -48,8 +48,7 @@ export default function ParentDashboard() {
     <div>
       <PageHeader
         title={`Xin chào, ${user?.full_name}! 👋`}
-        subtitle="Theo dõi con bạn đi xe buýt"
-        action={<button onClick={() => setLinkModal(true)} className="btn-primary">+ Thêm học sinh</button>}
+        subtitle="Theo dõi con bạn và các chuyến xe đưa đón"
       />
 
       {children.length === 0 ? (

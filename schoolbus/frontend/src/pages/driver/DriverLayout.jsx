@@ -6,6 +6,7 @@ const links = [
   { to:'/driver/active',       label:'Đang chạy',      icon:'🚌' },
   { to:'/driver/history',      label:'Lịch sử',        icon:'📂' },
   { to:'/driver/notifications',label:'Thông báo',      icon:'🔔' },
+  { to:'/driver/download',     label:'Tải ứng dụng',  icon:'📲' },
 ];
 export default function DriverLayout() {
   return <DashboardLayout title="Driver App" links={links} roleColor="bg-green-900" />;

@@ -10,3 +10,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </BrowserRouter>
 );
+
+// Đăng ký Service Worker cho PWA (chỉ chạy khi build production hoặc qua HTTPS/ngrok)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('✅ Service Worker đã đăng ký'))
+      .catch((err) => console.error('❌ Lỗi đăng ký Service Worker:', err));
+  });
+}

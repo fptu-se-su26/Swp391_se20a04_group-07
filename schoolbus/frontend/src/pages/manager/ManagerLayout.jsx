@@ -10,6 +10,7 @@ const links = [
   { to:'/manager/absent-requests', label:'Đơn xin vắng học', icon:'📋' },
   { to:'/manager/notifications', label:'Gửi thông báo', icon:'📢' },
   { to:'/manager/payments',label:'Thanh toán',  icon:'💰' },
+  { to:'/manager/download',label:'Tải ứng dụng', icon:'📲' },
 ];
 export default function ManagerLayout() {
   return (

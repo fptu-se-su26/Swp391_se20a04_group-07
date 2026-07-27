@@ -1,0 +1,1 @@
+import{j as i}from"./index-D0zzO16t.js";import{b as t}from"./index-RrC_r-kK.js";import{a as o}from"./index-BNLWv8uM.js";import"./dayjs.min-D6hMgMae.js";function e(){return i.jsx(o,{api:t})}export{e as default};
