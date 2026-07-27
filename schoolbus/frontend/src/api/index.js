@@ -42,6 +42,8 @@ export const adminApi = {
   resolveIncident: (id, note) => api.patch(`/admin/incidents/${id}/resolve`, { note }),
 
   getReport:       (params) => api.get('/admin/reports/attendance', { params }),
+  getRevenueReport:   (params) => api.get('/admin/reports/revenue', { params }),
+  exportRevenueExcel: (params) => api.get('/admin/reports/revenue/export', { params, responseType: 'blob' }),
 
   // Đơn xin vắng học
   getAbsentRequests:   (params) => api.get('/admin/absent-requests', { params }),
@@ -71,6 +73,12 @@ export const managerApi = {
   getSubscriptions:   () => api.get('/manager/subscriptions/pending'),
   generateInvoices:   (data) => api.post('/manager/payments/generate-invoices', data),
   getFeedbacks:       () => api.get('/manager/feedbacks'),
+
+  // ── Quản lý hóa đơn (mới) ──
+  listInvoices:          (params) => api.get('/manager/payments/invoices', { params }),
+  getInvoiceDetail:      (id) => api.get(`/manager/payments/invoices/${id}`),
+  confirmInvoicePayment: (id) => api.patch(`/manager/payments/invoices/${id}/confirm`),
+  retryPayosLink:        (id) => api.post(`/manager/payments/invoices/${id}/retry-payos`),
 };
 
 // ============================================================
@@ -109,10 +117,16 @@ export const parentApi = {
   createAbsentRequest:  (data) => api.post('/parent/absent-requests', data),
   getInvoices:          () => api.get('/parent/invoices'),
   payInvoice:           (id, data) => api.post(`/parent/invoices/${id}/pay`, data),
+  // ── Hóa đơn: nút "Tôi đã chuyển khoản" (mới, dùng route /pay sẵn có nhưng không cần payment_method) ──
+  markInvoiceTransferred: (id) => api.post(`/parent/invoices/${id}/pay`, {}),
   getNotifications:     (params) => api.get('/parent/notifications', { params }),
   markRead:             (id) => api.patch(`/parent/notifications/${id}/read`),
   markAllRead:          () => api.patch('/parent/notifications/read-all'),
   createFeedback:       (data) => api.post('/parent/feedback', data),
+
+  // ── Vị trí nhà học sinh ──
+  getChildLocation:     (childId) => api.get(`/parent/children/${childId}/location`),
+  updateChildLocation:  (childId, data) => api.patch(`/parent/children/${childId}/location`, data),
 };
 
 // ============================================================

@@ -25,5 +25,102 @@
   .sidebar-link.active { @apply bg-primary-100 text-primary-700 font-medium; }
 }
 
-/* Leaflet fix */
-.leaflet-container { height: 100%; width: 100%; border-radius: 12px; }
+/* Mapbox GL container: giữ cùng bo góc như Leaflet trước đây */
+.mapboxgl-canvas,
+.mapboxgl-map {
+  border-radius: 12px;
+}
+
+/* ─────────────────────────────────────────────
+   Login Animated Background & Micro-animations
+───────────────────────────────────────────── */
+@keyframes bgGradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes floatOrb1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+@keyframes floatOrb2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(-35px, 35px) scale(0.9); }
+  66% { transform: translate(25px, -25px) scale(1.08); }
+}
+
+@keyframes floatOrb3 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(40px, 30px) scale(1.15); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(99, 102, 241, 0.2); }
+  50% { box-shadow: 0 0 35px rgba(59, 130, 246, 0.7), 0 0 60px rgba(99, 102, 241, 0.4); }
+}
+
+@keyframes roadMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 100px 0; }
+}
+
+@keyframes shimmerSlow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.animate-bg-flow {
+  background-size: 300% 300%;
+  animation: bgGradientFlow 14s ease infinite;
+}
+
+.animate-orb-1 {
+  animation: floatOrb1 18s ease-in-out infinite;
+}
+
+.animate-orb-2 {
+  animation: floatOrb2 22s ease-in-out infinite;
+}
+
+.animate-orb-3 {
+  animation: floatOrb3 15s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.glass-card-login {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.dark-glass-header {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@keyframes floatStats {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float-stats {
+  animation: floatStats 6s ease-in-out infinite;
+}
+
+.dark-glass-widget {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+

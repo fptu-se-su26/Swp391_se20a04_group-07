@@ -7,6 +7,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { studentApi } from '../../api';
 import { PageHeader, LoadingScreen, StatCard, StatusBadge } from '../../components/common';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import dayjs from 'dayjs';
 
 const WEEKDAY_SHORT = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
@@ -23,7 +24,110 @@ const formatTime = (val) => {
   return timePart ? timePart.slice(0, 5) : '--:--';
 };
 
+// ============================================================
+// GIAO DIỆN ĐIỆN THOẠI — dải ngày trong tuần (dạng vòng tròn) +
+// timeline dọc theo từng ngày, mỗi buổi là 1 thẻ có vạch màu.
+// ============================================================
+function MobileScheduleView({ weekDates, grouped, anchor, todayStr, meta, onPrev, onNext, onToday, onPickDay, loading }) {
+  return (
+    <div className="-mx-4 -mt-4">
+      {/* Thanh chuyển tuần */}
+      <div className="px-4 pt-4 pb-3 bg-white border-b border-gray-100 sticky top-0 z-10">
+        <div className="flex items-center justify-between mb-3">
+          <button onClick={onPrev} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 active:bg-gray-200">‹</button>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-gray-800">
+              {meta ? `${dayjs(meta.monday).format('DD/MM')} – ${dayjs(meta.sunday).format('DD/MM/YYYY')}` : '—'}
+            </p>
+            {anchor !== todayStr ? (
+              <button onClick={onToday} className="text-xs text-primary-600 font-medium">Về tuần này</button>
+            ) : (
+              <p className="text-xs text-gray-400">Tuần hiện tại</p>
+            )}
+          </div>
+          <button onClick={onNext} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 active:bg-gray-200">›</button>
+        </div>
+
+        {/* Dải ngày trong tuần */}
+        <div className="flex justify-between gap-0.5">
+          {weekDates.map(d => {
+            const key = d.format('YYYY-MM-DD');
+            const isToday   = d.isSame(dayjs(), 'day');
+            const isPicked  = d.isSame(dayjs(anchor), 'day');
+            const hasTrip   = !!grouped[key];
+            return (
+              <button key={key} onClick={() => onPickDay(d)}
+                className="flex flex-col items-center gap-1 flex-1 py-1">
+                <span className="text-[11px] text-gray-400">{WEEKDAY_SHORT[d.day() === 0 ? 6 : d.day() - 1]}</span>
+                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors
+                  ${isToday ? 'bg-primary-600 text-white' : isPicked ? 'bg-primary-50 text-primary-700' : 'text-gray-700'}`}>
+                  {d.format('D')}
+                </span>
+                <span className={`w-1 h-1 rounded-full ${hasTrip ? 'bg-primary-500' : 'bg-transparent'}`} />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Timeline dọc theo từng ngày */}
+      <div className="px-4 py-4">
+        {loading ? (
+          <div className="py-10 text-center text-gray-400 text-sm">Đang tải...</div>
+        ) : (
+          <div className="space-y-5">
+            {weekDates.map(d => {
+              const key = d.format('YYYY-MM-DD');
+              const dayTrips = (grouped[key] || []).slice().sort(
+                (a, b) => (a.trip_type === 'morning_pickup' ? -1 : 1) - (b.trip_type === 'morning_pickup' ? -1 : 1)
+              );
+              const isToday = d.isSame(dayjs(), 'day');
+              return (
+                <div key={key} className="flex gap-3">
+                  <div className="w-12 flex-shrink-0 text-center pt-1.5">
+                    <p className={`text-base font-bold leading-none ${isToday ? 'text-primary-600' : 'text-gray-700'}`}>{d.format('DD/MM')}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5">{WEEKDAY_SHORT[d.day() === 0 ? 6 : d.day() - 1]}</p>
+                  </div>
+                  <div className="flex-1 min-w-0 pb-1 border-b border-gray-50">
+                    {dayTrips.length === 0 ? (
+                      <p className="text-xs text-gray-300 pt-2 pb-3">Không có lịch trình</p>
+                    ) : (
+                      <div className="space-y-2.5 pb-3">
+                        {dayTrips.map(t => {
+                          const isMorning = t.trip_type === 'morning_pickup';
+                          const att = t.TripAttendances?.[0];
+                          return (
+                            <div key={t.id} className="flex gap-2.5">
+                              <div className={`w-1 rounded-full flex-shrink-0 ${isMorning ? 'bg-orange-400' : 'bg-emerald-500'}`} />
+                              <div className="flex-1 min-w-0 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                                <div className="flex items-center justify-between gap-2 mb-1.5">
+                                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap
+                                    ${isMorning ? 'bg-orange-100 text-orange-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                    {isMorning ? '🌅 Đón sáng' : '🌇 Trả chiều'}
+                                  </span>
+                                  <span className="text-xs font-semibold text-gray-500 flex-shrink-0">⏰ {formatTime(t.scheduled_start)}</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-800 break-words leading-snug">{t.Route?.route_name || '—'}</p>
+                                {att && <div className="mt-2">{<StatusBadge status={att.status} />}</div>}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function StudentSchedule() {
+  const isMobile = useIsMobile();
   const todayStr = dayjs().format('YYYY-MM-DD');
 
   const [anchor, setAnchor]   = useState(todayStr); // ngày neo để BE tính tuần chứa nó
@@ -87,6 +191,26 @@ export default function StudentSchedule() {
   const tripDateSet = useMemo(() => new Set(trips.map(t => t.scheduled_date)), [trips]);
 
   if (loading && !meta) return <LoadingScreen />;
+
+  if (isMobile) {
+    return (
+      <div>
+        <PageHeader title="📅 Lịch tuần" subtitle={trips.length > 0 ? `${trips.length} chuyến trong tuần` : undefined} />
+        <MobileScheduleView
+          weekDates={weekDates}
+          grouped={grouped}
+          anchor={anchor}
+          todayStr={todayStr}
+          meta={meta}
+          onPrev={goPrevWeek}
+          onNext={goNextWeek}
+          onToday={goThisWeek}
+          onPickDay={pickDate}
+          loading={loading}
+        />
+      </div>
+    );
+  }
 
   const renderTripCell = (dateStr, tripType) => {
     const dayTrips = (grouped[dateStr] || []).filter(t => t.trip_type === tripType);

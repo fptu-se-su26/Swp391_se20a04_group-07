@@ -14,7 +14,7 @@ export default function ManagerDashboard() {
   const running = data?.trips?.filter(t => t.status === 'in_progress') || [];
   return (
     <div>
-      <PageHeader title="Dashboard Manager" subtitle={dayjs().format('dddd, DD/MM/YYYY')} />
+      <PageHeader title="Bảng điều khiển quản lý" subtitle={dayjs().format('dddd, DD/MM/YYYY')} />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard label="Chuyến hôm nay" value={data?.trips?.length} icon="📋" color="blue" />
         <StatCard label="Đang vận hành"  value={running.length}       icon="🟢" color="green" />
@@ -22,7 +22,7 @@ export default function ManagerDashboard() {
         <StatCard label="Xe bảo trì"    value={data?.vehicles?.filter(v=>v.status==='maintenance').length} icon="🔧" color="red" />
       </div>
       <div className="card">
-        <h3 className="font-semibold text-gray-700 mb-3">Chuyến đang chạy</h3>
+        <h3 className="font-semibold text-gray-700 mb-3">Chuyến xe đang chạy</h3>
         {running.length === 0 ? <p className="text-gray-400 text-sm">Không có chuyến nào đang chạy</p> : (
           <div className="space-y-2">
             {running.map(t => (

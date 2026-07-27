@@ -6,12 +6,13 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    host: true, // lắng nghe trên 0.0.0.0, không chỉ localhost — bắt buộc để ngrok forward được
+    // Cho phép mọi domain *.ngrok-free.dev / *.ngrok-free.app / *.ngrok.io truy cập,
+    // vì domain ngrok free đổi ngẫu nhiên mỗi lần khởi động lại.
+    allowedHosts: ['.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io', '.ngrok.app'],
     proxy: {
       '/api': { target: 'http://localhost:3000', changeOrigin: true },
       '/uploads': { target: 'http://localhost:3000', changeOrigin: true },
-      // ✅ FIX: thiếu proxy này khiến io('/') cố kết nối WebSocket
-      // thẳng tới Vite dev server (port 5173) thay vì backend (port 3000)
-      // -> "Socket error: timeout" liên tục.
       '/socket.io': { target: 'http://localhost:3000', ws: true, changeOrigin: true }
     }
   }

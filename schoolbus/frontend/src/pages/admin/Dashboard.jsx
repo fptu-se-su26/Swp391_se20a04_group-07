@@ -21,7 +21,6 @@ export default function AdminDashboard() {
   const pieData = [
     { name: 'Học sinh',   value: stats?.total_students || 0 },
     { name: 'Tài xế',     value: stats?.total_drivers || 0 },
-    { name: 'Phụ huynh',  value: stats?.total_parents || 0 },
   ];
 
   const tripData = [

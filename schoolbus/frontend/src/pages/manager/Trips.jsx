@@ -199,7 +199,7 @@ export default function ManagerTrips() {
           <div className="flex flex-wrap gap-2">
             <button onClick={handleCreateDaily} disabled={creatingDaily}
               className="btn-secondary text-sm">
-              {creatingDaily ? '⏳ Đang tạo...' : '⚡ Tạo chuyến hàng loạt'}
+              {creatingDaily ? '⏳ Đang tạo...' : '⚡ Tạo chuyến nhanh'}
             </button>
             <button onClick={() => { setForm({ ...initForm, scheduled_date: date }); setModal(true); }}
               className="btn-primary">
@@ -221,11 +221,6 @@ export default function ManagerTrips() {
           <span className="badge-green">{stats.completed} Hoàn thành</span>
           {stats.cancelled > 0 && <span className="badge-red">{stats.cancelled} Đã hủy</span>}
         </div>
-      </div>
-
-      <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-700">
-        💡 <strong>Tạo chuyến hàng loạt</strong>: tự động tạo chuyến Sáng + Chiều cho tất cả tuyến đang hoạt động.
-        · <strong>Tạo chuyến</strong>: tạo thủ công 1 chuyến cụ thể.
       </div>
 
       {/* Trip list — grouped by route */}

@@ -1,50 +1,26 @@
-// src/pages/manager/Fleet.jsx - Live GPS tracking map
-import React, { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+// src/pages/manager/Fleet.jsx - Live GPS tracking map (Mapbox)
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import Map, { Marker, Popup } from 'react-map-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { useSocket } from '../../context';
 import { managerApi } from '../../api';
 import { PageHeader, StatusBadge } from '../../components/common';
-import L from 'leaflet';
 
-const busIcon = L.divIcon({ className:'', html:'<div style="font-size:28px;filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.4))">🚌</div>', iconSize:[32,32], iconAnchor:[16,16] });
+const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
-// Vị trí mặc định khi chưa có xe nào (trung tâm VN) — chỉ dùng khi thật sự không có dữ liệu
-const DEFAULT_CENTER = [16.0544, 108.2022]; // Đà Nẵng, có thể đổi theo khu vực hoạt động chính
-
-// ── Component điều khiển map từ bên ngoài ──────────────────────
-// MapContainer chỉ nhận `center` lúc khởi tạo, không tự phản ứng khi
-// state thay đổi -> cần dùng useMap() để gọi setView/flyTo thủ công.
-function MapController({ positions, selectedTripId }) {
-  const map = useMap();
-  const hasAutoCentered = useRef(false);
-
-  // Tự động center vào xe đầu tiên có vị trí, chỉ 1 lần khi vừa có dữ liệu
-  // (tránh việc map tự nhảy về vị trí xe mỗi lần re-render/F5)
-  useEffect(() => {
-    const posList = Object.values(positions);
-    if (!hasAutoCentered.current && posList.length > 0) {
-      map.setView([posList[0].lat, posList[0].lng], 15);
-      hasAutoCentered.current = true;
-    }
-  }, [positions, map]);
-
-  // Bay tới vị trí xe được chọn khi click vào danh sách tài xế
-  useEffect(() => {
-    if (selectedTripId && positions[selectedTripId]) {
-      const { lat, lng } = positions[selectedTripId];
-      map.flyTo([lat, lng], 16, { duration: 1 });
-    }
-  }, [selectedTripId, positions, map]);
-
-  return null;
-}
+// Vị trí mặc định khi chưa có xe nào (Đà Nẵng) — chỉ dùng khi thật sự không có dữ liệu
+const DEFAULT_CENTER = { longitude: 108.2022, latitude: 16.0544 };
 
 export default function Fleet() {
   const socket = useSocket();
+  const mapRef = useRef(null);
+  const hasAutoCentered = useRef(false);
   const [trips, setTrips] = useState([]);
   const [positions, setPositions] = useState({});
   const [selectedTripId, setSelectedTripId] = useState(null);
-  const markerRefs = useRef({});
+  const [popupTripId, setPopupTripId] = useState(null);
+
+  const [viewState, setViewState] = useState({ ...DEFAULT_CENTER, zoom: 13 });
 
   useEffect(() => {
     managerApi.getTripsToday().then(r => setTrips(r.data.data)).catch(console.error);
@@ -60,46 +36,83 @@ export default function Fleet() {
     return () => { socket.off('fleet:current_positions'); socket.off('bus:location'); };
   }, [socket]);
 
+  // Tự động bay tới xe đầu tiên có vị trí, chỉ 1 lần khi vừa có dữ liệu
+  // (tương đương useEffect + hasAutoCentered.current trong bản Leaflet cũ)
+  useEffect(() => {
+    const posList = Object.values(positions);
+    if (!hasAutoCentered.current && posList.length > 0 && mapRef.current) {
+      mapRef.current.flyTo({ center: [posList[0].lng, posList[0].lat], zoom: 15, duration: 800 });
+      hasAutoCentered.current = true;
+    }
+  }, [positions]);
+
+  // Bay tới vị trí xe được chọn khi click vào danh sách + mở popup sau khi bay xong
+  const flyToTrip = useCallback((tripId) => {
+    setSelectedTripId(tripId);
+    const pos = positions[tripId];
+    if (pos && mapRef.current) {
+      mapRef.current.flyTo({ center: [pos.lng, pos.lat], zoom: 16, duration: 1000 });
+      setTimeout(() => setPopupTripId(tripId), 350);
+    }
+  }, [positions]);
+
+  const popupTrip = popupTripId ? trips.find(t => t.id === popupTripId) : null;
+  const popupPos  = popupTripId ? positions[popupTripId] : null;
+
   return (
     <div>
-      <PageHeader title="Theo dõi đội xe" subtitle="Live GPS tracking" />
+      <PageHeader title="Theo dõi xe đưa đón" subtitle="GPS trực tuyến" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 h-96 rounded-xl overflow-hidden shadow-sm border">
-          <MapContainer center={DEFAULT_CENTER} zoom={13} style={{ height:'100%', width:'100%' }}>
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="© OpenStreetMap" />
-            <MapController positions={positions} selectedTripId={selectedTripId} />
-            {Object.entries(positions).map(([tripId, pos]) => {
-              const trip = trips.find(t => t.id === tripId);
-              return (
-                <Marker
-                  key={tripId}
-                  position={[pos.lat, pos.lng]}
-                  icon={busIcon}
-                  ref={(el) => { if (el) markerRefs.current[tripId] = el; }}
-                  eventHandlers={{ click: () => setSelectedTripId(tripId) }}
-                >
-                  <Popup>
-                    <div className="text-sm">
-                      <p className="font-bold">{trip?.Route?.route_name || 'Xe đang chạy'}</p>
-                      <p>🏎️ {pos.speed?.toFixed(1) || 0} km/h</p>
-                      <p>👨‍✈️ {trip?.driver?.full_name}</p>
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            })}
-          </MapContainer>
+          <Map
+            ref={mapRef}
+            {...viewState}
+            onMove={(evt) => setViewState(evt.viewState)}
+            mapboxAccessToken={MAPBOX_TOKEN}
+            mapStyle="mapbox://styles/mapbox/streets-v12"
+            style={{ width: '100%', height: '100%' }}
+          >
+            {Object.entries(positions).map(([tripId, pos]) => (
+              <Marker
+                key={tripId}
+                longitude={pos.lng}
+                latitude={pos.lat}
+                anchor="center"
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  setSelectedTripId(tripId);
+                  setPopupTripId(tripId);
+                }}
+              >
+                <div style={{ fontSize: 28, filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.4))', cursor: 'pointer' }}>
+                  🚌
+                </div>
+              </Marker>
+            ))}
+
+            {popupTrip && popupPos && (
+              <Popup
+                longitude={popupPos.lng}
+                latitude={popupPos.lat}
+                anchor="bottom"
+                onClose={() => setPopupTripId(null)}
+                closeOnClick={false}
+              >
+                <div className="text-sm">
+                  <p className="font-bold">{popupTrip.Route?.route_name || 'Xe đang chạy'}</p>
+                  <p>🏎️ {popupPos.speed?.toFixed(1) || 0} km/h</p>
+                  <p>👨‍✈️ {popupTrip.driver?.full_name}</p>
+                </div>
+              </Popup>
+            )}
+          </Map>
         </div>
         <div className="space-y-2">
-          <h3 className="font-semibold text-gray-700 text-sm">Chuyến đang chạy</h3>
+          <h3 className="font-semibold text-gray-700 text-sm">Chuyến xe đang hoạt động</h3>
           {trips.filter(t => t.status === 'in_progress').map(t => (
             <div
               key={t.id}
-              onClick={() => {
-                setSelectedTripId(t.id);
-                // Mở popup của marker tương ứng sau khi map bay tới
-                setTimeout(() => markerRefs.current[t.id]?.openPopup(), 350);
-              }}
+              onClick={() => flyToTrip(t.id)}
               className={`card p-3 border-l-4 cursor-pointer transition hover:shadow-md ${
                 selectedTripId === t.id ? 'border-l-blue-500 bg-blue-50' : 'border-l-green-400'
               }`}
@@ -112,7 +125,7 @@ export default function Fleet() {
               )}
             </div>
           ))}
-          {trips.filter(t=>t.status==='in_progress').length === 0 && (
+          {trips.filter(t => t.status === 'in_progress').length === 0 && (
             <p className="text-sm text-gray-400">Không có xe nào đang chạy</p>
           )}
         </div>

@@ -1,0 +1,1 @@
+import{j as i}from"./index-D0zzO16t.js";import{d as o}from"./index-RrC_r-kK.js";import{c as t}from"./index-BNLWv8uM.js";import"./dayjs.min-D6hMgMae.js";function n(){return i.jsx(t,{api:o,title:"Thông báo"})}export{n as default};

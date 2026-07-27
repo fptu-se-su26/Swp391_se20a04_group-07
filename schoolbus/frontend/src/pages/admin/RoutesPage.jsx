@@ -8,7 +8,6 @@ import api from '../../api/axios';
 const routeApi = {
   getDrivers: () => api.get('/admin/users', { params: { role: 'driver', limit: 100 } }),
   getVehicles: () => api.get('/admin/vehicles'),
-  addStop:    (id, data) => api.post(`/admin/routes/${id}/stops`, data),
   deleteRoute:(id) => api.delete(`/admin/routes/${id}`),
   updateRoute:(id, data) => api.put(`/admin/routes/${id}`, data),
 };
@@ -20,8 +19,6 @@ const initForm = {
   driver_id:         '',
   vehicle_id:        '',
 };
-
-const initStop = { stop_name: '', address: '', estimated_time: '', stop_order: 1 };
 
 // Tìm xe đang gán cho 1 tài xế (nếu có)
 function findVehicleByDriver(vehicles, driverId) {
@@ -40,10 +37,9 @@ export default function RoutesPage() {
   const [loading,  setLoading]  = useState(true);
 
   // Modals
-  const [modal,    setModal]    = useState(null); // 'add' | 'edit' | 'stop'
+  const [modal,    setModal]    = useState(null); // 'add' | 'edit'
   const [selected, setSelected] = useState(null);
   const [form,     setForm]     = useState(initForm);
-  const [stopForm, setStopForm] = useState(initStop);
   const [confirm,  setConfirm]  = useState(null);
   const [saving,   setSaving]   = useState(false);
 
@@ -82,12 +78,6 @@ export default function RoutesPage() {
     setModal('edit');
   };
 
-  const openAddStop = (r) => {
-    setSelected(r);
-    setStopForm({ ...initStop, stop_order: (r.RouteStops?.length || 0) + 1 });
-    setModal('stop');
-  };
-
   // ── Save / Delete ─────────────────────────────────────────
   const handleSave = async () => {
     if (!form.route_name.trim()) return toast.error('Vui lòng nhập tên tuyến');
@@ -100,17 +90,6 @@ export default function RoutesPage() {
         await routeApi.updateRoute(selected.id, form);
         toast.success('Đã cập nhật tuyến đường');
       }
-      setModal(null);
-      fetchAll();
-    } catch {} finally { setSaving(false); }
-  };
-
-  const handleAddStop = async () => {
-    if (!stopForm.stop_name.trim()) return toast.error('Vui lòng nhập tên điểm dừng');
-    setSaving(true);
-    try {
-      await routeApi.addStop(selected.id, stopForm);
-      toast.success('Đã thêm điểm dừng');
       setModal(null);
       fetchAll();
     } catch {} finally { setSaving(false); }
@@ -158,8 +137,6 @@ export default function RoutesPage() {
 
               {/* Action buttons */}
               <div className="flex gap-2 ml-4 flex-shrink-0">
-                <button onClick={() => openAddStop(r)}
-                  className="btn-secondary text-xs py-1 px-2">+ Điểm dừng</button>
                 <button onClick={() => openEdit(r)}
                   className="text-blue-600 hover:bg-blue-50 border border-blue-200 rounded-lg px-3 py-1 text-xs font-medium transition">
                   ✏️ Sửa
@@ -183,21 +160,10 @@ export default function RoutesPage() {
               </div>
             </div>
 
-            {/* Stops */}
-            {r.RouteStops?.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {r.RouteStops.sort((a,b) => a.stop_order - b.stop_order).map((s, i) => (
-                  <React.Fragment key={s.id}>
-                    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full border border-blue-100">
-                      <span className="w-4 h-4 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold" style={{fontSize:'10px'}}>{i+1}</span>
-                      {s.stop_name}
-                      {s.estimated_time && <span className="text-blue-400">· {s.estimated_time.slice(0,5)}</span>}
-                    </span>
-                    {i < r.RouteStops.length - 1 && <span className="text-gray-300 self-center">→</span>}
-                  </React.Fragment>
-                ))}
-              </div>
-            )}
+            {/* Ghi chú: học sinh trên tuyến này được đón/trả tận nhà theo địa chỉ đã đăng ký */}
+            <p className="mt-3 text-xs text-gray-400">
+              🏠 Học sinh trên tuyến được đón/trả tận nhà theo địa chỉ đã đăng ký.
+            </p>
           </div>
         ))}
       </div>
@@ -289,55 +255,12 @@ export default function RoutesPage() {
         </div>
       </Modal>
 
-      {/* ── Modal Thêm điểm dừng ── */}
-      <Modal
-        open={modal === 'stop'}
-        onClose={() => setModal(null)}
-        title={`📍 Thêm điểm dừng — ${selected?.route_name}`}
-        size="sm"
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tên điểm dừng <span className="text-red-500">*</span></label>
-            <input className="input" placeholder="VD: Bến Thành"
-              value={stopForm.stop_name}
-              onChange={e => setStopForm(f => ({ ...f, stop_name: e.target.value }))} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-            <input className="input" placeholder="VD: Quảng trường Bến Thành, Q.1"
-              value={stopForm.address}
-              onChange={e => setStopForm(f => ({ ...f, address: e.target.value }))} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Giờ đến (ước tính)</label>
-              <input type="time" className="input"
-                value={stopForm.estimated_time}
-                onChange={e => setStopForm(f => ({ ...f, estimated_time: e.target.value }))} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự điểm</label>
-              <input type="number" min="1" className="input"
-                value={stopForm.stop_order}
-                onChange={e => setStopForm(f => ({ ...f, stop_order: +e.target.value }))} />
-            </div>
-          </div>
-          <div className="flex gap-3 pt-2">
-            <button onClick={() => setModal(null)} className="btn-secondary flex-1">Hủy</button>
-            <button onClick={handleAddStop} disabled={saving} className="btn-primary flex-1">
-              {saving ? 'Đang thêm...' : '+ Thêm điểm dừng'}
-            </button>
-          </div>
-        </div>
-      </Modal>
-
       {/* Confirm xóa */}
       <ConfirmDialog
         open={!!confirm} onClose={() => setConfirm(null)}
         onConfirm={() => { handleDelete(confirm?.id); setConfirm(null); }}
         title="Xóa tuyến đường"
-        message={`Bạn có chắc muốn xóa tuyến "${confirm?.name}"? Tất cả điểm dừng sẽ bị xóa theo.`}
+        message={`Bạn có chắc muốn xóa tuyến "${confirm?.name}"?`}
         danger
       />
     </div>

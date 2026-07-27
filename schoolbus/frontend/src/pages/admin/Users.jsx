@@ -85,20 +85,13 @@ export default function AdminUsers() {
         action={<button onClick={openCreate} className="btn-primary">+ Tạo tài khoản</button>}
       />
 
-      {/* Ghi chú */}
-      <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-700 flex items-center gap-2">
-        <span>ℹ️</span>
-        <span>Trang này quản lý tài khoản <strong>Admin, Manager, Tài xế</strong> (đăng nhập bằng email + mật khẩu).
-        Học sinh và Phụ huynh được quản lý tại trang <strong>Học sinh</strong> (đăng nhập bằng Google).</span>
-      </div>
-
       {/* Filters */}
       <div className="card mb-4 flex flex-wrap gap-3">
         <input className="input w-64" placeholder="🔍 Tìm kiếm tên, email, SĐT..." value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }} />
         <select className="input w-40" value={roleFilter}
           onChange={e => { setRoleFilter(e.target.value); setPage(1); }}>
-          <option value="">Tất cả role</option>
+          <option value="">Tất cả</option>
           {/* Chỉ hiện 3 role — KHÔNG có parent/student */}
           {ROLES.map(r => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
         </select>
