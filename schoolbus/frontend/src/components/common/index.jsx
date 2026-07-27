@@ -1,7 +1,9 @@
-// ============================================================
+
+
+
+
 // Central re-export — giữ nguyên tất cả named exports để các
 // file đang import từ '../../components/common' không cần sửa.
-// ============================================================
 
 export { Sidebar, MobileLayout, MobileDrawer, InstallAppButton } from './Sidebar';
 export { DashboardLayout } from './DashboardLayout';
