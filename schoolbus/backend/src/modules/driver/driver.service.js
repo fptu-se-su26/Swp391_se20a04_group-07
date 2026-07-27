@@ -42,7 +42,7 @@ class DriverService {
           include: [{
             model: Student,
             as: 'student',
-            attributes: ['id', 'full_name', 'student_phone', 'student_email']
+            attributes: ['id', 'full_name', 'student_phone', 'student_email', 'home_address', 'home_lat', 'home_lng']
           }]
         }
       ]
@@ -111,7 +111,7 @@ class DriverService {
     if (!attendance) throw Object.assign(new Error('Học sinh không trong chuyến này'), { status: 404 });
 
     const updateData = { status, noted_by: driverId, note: noteData };
-    if (status === 'boarded')     updateData.boarded_at = new Date();
+    if (status === 'boarded') updateData.boarded_at = new Date();
     if (status === 'dropped_off') updateData.dropped_at = new Date();
 
     await attendance.update(updateData);
@@ -137,10 +137,10 @@ class DriverService {
     // (trip_type = 'both' áp dụng cho cả 2 buổi, hoặc khớp đúng buổi của chuyến này).
     const validRequest = await AbsentRequest.findOne({
       where: {
-        student_id:  studentId,
+        student_id: studentId,
         absent_date: trip.scheduled_date,
-        status:      'approved',
-        trip_type:   { [Op.in]: ['both', trip.trip_type] },
+        status: 'approved',
+        trip_type: { [Op.in]: ['both', trip.trip_type] },
       },
     });
     if (validRequest) return; // đã có đơn xin nghỉ hợp lệ → không gửi email
@@ -184,7 +184,7 @@ class DriverService {
   async reportIncident(data, driverId) {
     return Incident.create({
       id: uuidv4(),
-      reported_by:   driverId,
+      reported_by: driverId,
       reporter_type: 'driver',
       ...data
     });
@@ -226,7 +226,7 @@ class DriverService {
     const data = rows.map(t => {
       const stops = t.Route?.RouteStops || [];
       const firstStop = stops[0];
-      const lastStop  = stops[stops.length - 1];
+      const lastStop = stops[stops.length - 1];
 
       let durationMin = null;
       if (t.actual_start && t.actual_end) {
@@ -253,7 +253,7 @@ class DriverService {
       return {
         ...t.toJSON(),
         start_point: firstStop?.stop_name || firstStop?.address || null,
-        end_point:   lastStop?.stop_name  || lastStop?.address  || null,
+        end_point: lastStop?.stop_name || lastStop?.address || null,
         distance_km: t.Route?.total_distance ?? null,
         duration_min: durationMin,
         on_time: onTime,
@@ -288,6 +288,42 @@ class DriverService {
       FROM Trips WHERE driver_id = :driverId
     `, { replacements: { driverId }, type: sequelize.QueryTypes.SELECT });
     return stats[0];
+  }
+
+  // ============================================================
+  // NOTIFICATIONS — hộp thư thông báo của tài xế
+  // ============================================================
+  async getNotifications(driverId, { page = 1, limit = 20 } = {}) {
+    const { Notification } = require('../../models');
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    const { count, rows } = await Notification.findAndCountAll({
+      where: { user_id: driverId, user_type: 'driver', recalled_at: null },
+      order: [['pinned', 'DESC'], ['sent_at', 'DESC']],
+      limit: parseInt(limit),
+      offset,
+    });
+    const unread = await Notification.count({
+      where: { user_id: driverId, user_type: 'driver', is_read: false, recalled_at: null },
+    });
+
+    return { total: count, page: parseInt(page), limit: parseInt(limit), unread, data: rows };
+  }
+
+  async markNotificationRead(notificationId, driverId) {
+    const { Notification } = require('../../models');
+    await Notification.update(
+      { is_read: true },
+      { where: { id: notificationId, user_id: driverId, user_type: 'driver' } }
+    );
+  }
+
+  async markAllNotificationsRead(driverId) {
+    const { Notification } = require('../../models');
+    await Notification.update(
+      { is_read: true },
+      { where: { user_id: driverId, user_type: 'driver', is_read: false } }
+    );
   }
 }
 
