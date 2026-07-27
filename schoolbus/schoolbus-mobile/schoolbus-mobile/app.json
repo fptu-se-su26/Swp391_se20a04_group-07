@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "SchoolBus",
+    "slug": "schoolbus-mobile",
+    "scheme": "schoolbus",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#16233F"
+    },
+    "ios": { "supportsTablet": true, "bundleIdentifier": "vn.schoolbus.app" },
+    "android": {
+      "package": "vn.schoolbus.app",
+      "adaptiveIcon": { "backgroundColor": "#16233F" }
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "extra": {
+      "apiBaseUrl": "http://localhost:3000/api/v1",
+      "googleExpoClientId": "PUT_EXPO_CLIENT_ID_HERE",
+      "googleIosClientId": "PUT_IOS_CLIENT_ID_HERE",
+      "googleAndroidClientId": "PUT_ANDROID_CLIENT_ID_HERE"
+    }
+  }
+}
