@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sidebar, DashboardLayout, NotificationBell } from '../../components/common';
+import { DashboardLayout, NotificationBell } from '../../components/common';
 
 const links = [
   { to: '/admin',           label: 'Tổng quan',    icon: '📊', end: true },
@@ -15,13 +15,11 @@ const links = [
 
 export default function AdminLayout() {
   return (
-    <DashboardLayout sidebar={
-      <Sidebar
-        title="Admin Panel"
-        links={links}
-        roleColor="bg-purple-900"
-        notifBell={<NotificationBell role="admin" absentRequestsPath="/admin/absent-requests" />}
-      />
-    } />
+    <DashboardLayout
+      title="Admin Panel"
+      links={links}
+      roleColor="bg-purple-900"
+      notifBell={<NotificationBell role="admin" absentRequestsPath="/admin/absent-requests" />}
+    />
   );
 }

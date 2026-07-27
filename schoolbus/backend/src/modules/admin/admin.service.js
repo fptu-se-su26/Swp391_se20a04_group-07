@@ -4,7 +4,8 @@
 const {
   UserAdmin, UserManager, UserDriver,
   Student, ClassRoom,
-  Vehicle, Route, RouteStop, Trip, Incident, Notification, sequelize
+  Vehicle, Route, RouteStop, Trip, Incident, Notification,
+  Invoice, sequelize
 } = require('../../models');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
@@ -13,14 +14,14 @@ const { getIO } = require('../../utils/socketRegistry');
 
 // Map role -> model (CHỈ cho admin/manager/driver)
 const MODEL_MAP = {
-  admin:   UserAdmin,
+  admin: UserAdmin,
   manager: UserManager,
-  driver:  UserDriver,
+  driver: UserDriver,
 };
 
 // Map role gửi -> model để lấy tên người gửi
 const SENDER_MODEL_MAP = {
-  admin:   UserAdmin,
+  admin: UserAdmin,
   manager: UserManager,
 };
 
@@ -58,8 +59,8 @@ class AdminService {
       if (search) {
         where[Op.or] = [
           { full_name: { [Op.like]: `%${search}%` } },
-          { email:     { [Op.like]: `%${search}%` } },
-          { phone:     { [Op.like]: `%${search}%` } },
+          { email: { [Op.like]: `%${search}%` } },
+          { phone: { [Op.like]: `%${search}%` } },
         ];
       }
       const { count, rows } = await Model.findAndCountAll({
@@ -77,24 +78,24 @@ class AdminService {
     const searchWhere = search ? {
       [Op.or]: [
         { full_name: { [Op.like]: `%${search}%` } },
-        { email:     { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
       ]
     } : {};
 
     const [admins, managers, drivers] = await Promise.all([
-      UserAdmin.findAll({   where: { is_active: true, ...searchWhere }, attributes: { exclude: ['password_hash'] } }),
+      UserAdmin.findAll({ where: { is_active: true, ...searchWhere }, attributes: { exclude: ['password_hash'] } }),
       UserManager.findAll({ where: { is_active: true, ...searchWhere }, attributes: { exclude: ['password_hash'] } }),
-      UserDriver.findAll({  where: { is_active: true, ...searchWhere }, attributes: { exclude: ['password_hash'] } }),
+      UserDriver.findAll({ where: { is_active: true, ...searchWhere }, attributes: { exclude: ['password_hash'] } }),
     ]);
 
     const all = [
-      ...admins.map(u   => ({ ...u.toJSON(), role: 'admin' })),
+      ...admins.map(u => ({ ...u.toJSON(), role: 'admin' })),
       ...managers.map(u => ({ ...u.toJSON(), role: 'manager' })),
-      ...drivers.map(u  => ({ ...u.toJSON(), role: 'driver' })),
+      ...drivers.map(u => ({ ...u.toJSON(), role: 'driver' })),
     ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
     const total = all.length;
-    const data  = all.slice(offset, offset + parseInt(limit));
+    const data = all.slice(offset, offset + parseInt(limit));
     return { total, page: parseInt(page), limit: parseInt(limit), data };
   }
 
@@ -125,7 +126,7 @@ class AdminService {
   }
 
   async updateUser(id, data) {
-    const role  = data.role;
+    const role = data.role;
     const Model = MODEL_MAP[role];
     if (!Model) throw Object.assign(new Error('Thiếu role hợp lệ'), { status: 400 });
 
@@ -262,6 +263,67 @@ class AdminService {
   }
 
   // ============================================================
+  // BÁO CÁO LỢI NHUẬN (chỉ tính hóa đơn status = 'paid')
+  // Thống kê theo kỳ thanh toán hàng tháng (due_date), không gắn theo Trip
+  // vì Invoice chỉ liên kết Student, không có trip_id.
+  // Lọc theo tuyến xe qua Student.bus_route_id — KHÔNG dùng PaymentPlan.route_id
+  // vì luồng xuất hóa đơn hàng loạt luôn set plan_id = NULL (xem other.routes.js),
+  // PaymentPlan không thực sự được gắn với Invoice trong hệ thống này.
+  // startDate/endDate là TÙY CHỌN: nếu không truyền, lấy toàn bộ dữ liệu
+  // (đồng bộ với cách trang "Quản lý hóa đơn" của Manager mặc định hiển thị
+  // hết, không ép chọn khoảng ngày trước).
+  // ============================================================
+  async getRevenueReport({ startDate, endDate, routeId }) {
+    const conditions = [];
+    const replacements = {};
+
+    if (startDate) { conditions.push('i.due_date >= :startDate'); replacements.startDate = startDate; }
+    if (endDate) { conditions.push('i.due_date <= :endDate'); replacements.endDate = endDate; }
+    if (routeId) { conditions.push('s.bus_route_id = :routeId'); replacements.routeId = routeId; }
+
+    const whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    // Tổng quan (KPI) - đếm distinct phụ huynh trên toàn bộ khoảng thời gian
+    // để không bị đếm trùng phụ huynh xuất hiện ở nhiều tháng.
+    const totalsRows = await sequelize.query(`
+      SELECT
+        ISNULL(SUM(CASE WHEN i.status = 'paid' THEN i.amount ELSE 0 END), 0)      AS total_revenue,
+        SUM(CASE WHEN i.status = 'paid' THEN 1 ELSE 0 END)                       AS total_paid_invoices,
+        COUNT(DISTINCT CASE WHEN i.status = 'paid' THEN i.parent_id END)          AS parents_paid,
+        COUNT(DISTINCT CASE
+          WHEN i.status IN ('pending','awaiting_confirmation') THEN i.parent_id
+        END)                                                                      AS parents_unpaid
+      FROM Invoices i
+      LEFT JOIN Students s ON s.id = i.student_id
+      ${whereClause}
+    `, { replacements, type: sequelize.QueryTypes.SELECT });
+
+    // Chi tiết theo từng tháng (dùng cho cả biểu đồ cột và bảng số liệu)
+    const monthly = await sequelize.query(`
+      SELECT
+        FORMAT(i.due_date, 'yyyy-MM') AS month,
+        COUNT(*)                                                              AS total_invoices,
+        SUM(CASE WHEN i.status = 'paid' THEN 1 ELSE 0 END)                    AS paid_invoices,
+        SUM(CASE WHEN i.status IN ('pending','awaiting_confirmation') THEN 1 ELSE 0 END) AS unpaid_invoices,
+        SUM(CASE WHEN i.status = 'paid' THEN i.amount ELSE 0 END)             AS revenue,
+        COUNT(DISTINCT CASE WHEN i.status = 'paid' THEN i.parent_id END)       AS parents_paid,
+        COUNT(DISTINCT CASE
+          WHEN i.status IN ('pending','awaiting_confirmation') THEN i.parent_id
+        END)                                                                   AS parents_unpaid
+      FROM Invoices i
+      LEFT JOIN Students s ON s.id = i.student_id
+      ${whereClause}
+      GROUP BY FORMAT(i.due_date, 'yyyy-MM')
+      ORDER BY month ASC
+    `, { replacements, type: sequelize.QueryTypes.SELECT });
+
+    return {
+      summary: totalsRows[0] || { total_revenue: 0, total_paid_invoices: 0, parents_paid: 0, parents_unpaid: 0 },
+      monthly,
+    };
+  }
+
+  // ============================================================
   // GỬI THÔNG BÁO THEO ĐỐI TƯỢNG (Admin/Manager)
   // targetRole: 'driver' | 'student' | 'parent' | 'all'
   // Chỉ được chọn 1 nhóm cho mỗi lần gửi (hoặc 'all' = cả 3 nhóm),
@@ -394,7 +456,7 @@ class AdminService {
     }
     const data = {};
     if (title?.trim()) data.title = title.trim();
-    if (body?.trim())  data.body  = body.trim();
+    if (body?.trim()) data.body = body.trim();
     if (priority && ['normal', 'important', 'urgent'].includes(priority)) data.priority = priority;
     await Notification.update(data, { where: { batch_id: batchId } });
     return { batchId };

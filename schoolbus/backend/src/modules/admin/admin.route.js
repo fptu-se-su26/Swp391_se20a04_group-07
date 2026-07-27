@@ -1,10 +1,11 @@
 const express = require('express');
-const router  = express.Router();
+const router = express.Router();
 const adminService = require('./admin.service');
-const absentRequestService = require('./absentRequest.service');
 const { verifyToken, authorizeRoles } = require('../../middlewares/auth.middleware');
+const absentRequestRoutes = require('../absentRequest/absentRequest.route');
+router.use('/absent-requests', absentRequestRoutes);
 
-const auth        = [verifyToken, authorizeRoles('admin')];
+const auth = [verifyToken, authorizeRoles('admin')];
 const managerAuth = [verifyToken, authorizeRoles('admin', 'manager')];
 
 // ── DASHBOARD ──────────────────────────────────────────────
@@ -41,6 +42,53 @@ router.delete('/users/:id', ...auth, async (req, res, next) => {
     const role = req.body.role || req.query.role;
     await adminService.deleteUser(req.params.id, role);
     res.json({ success: true, message: 'Đã xóa user' });
+  } catch (e) { next(e); }
+});
+
+// ============================================================
+// THÊM VÀO admin.route.js (dưới các route ── USERS ── là hợp lý nhất)
+// Chỉ chạy 1 lần để geocode ngược cho các học sinh ĐÃ CÓ SẴN trong DB
+// trước khi tính năng này ra đời (học sinh thêm mới sau này sẽ tự
+// geocode ngay lúc tạo, không cần dùng route này nữa).
+// ============================================================
+router.post('/students/geocode-missing', ...auth, async (req, res, next) => {
+  try {
+    const { Student } = require('../../models');
+    const { Op } = require('sequelize');
+    const { geocodeAddress } = require('../../utils/geocode.util');
+
+    const students = await Student.findAll({
+      where: {
+        home_address: { [Op.ne]: null },
+        home_lat: null,
+      },
+      attributes: ['id', 'home_address'],
+    });
+
+    let success = 0;
+    const failed = [];
+
+    // Chạy tuần tự (không Promise.all) để tránh vượt rate-limit của Mapbox Geocoding API
+    for (const s of students) {
+      const result = await geocodeAddress(s.home_address);
+      if (result) {
+        await Student.update(
+          { home_lat: result.lat, home_lng: result.lng },
+          { where: { id: s.id } }
+        );
+        success++;
+      } else {
+        failed.push({ id: s.id, address: s.home_address });
+      }
+      // Nghỉ nhẹ giữa các lần gọi, tránh bị Mapbox chặn do gọi quá nhanh
+      await new Promise((r) => setTimeout(r, 150));
+    }
+
+    res.json({
+      success: true,
+      message: `Đã geocode ${success}/${students.length} học sinh`,
+      data: { total: students.length, success, failed },
+    });
   } catch (e) { next(e); }
 });
 
@@ -114,6 +162,15 @@ router.get('/reports/attendance', ...auth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// Báo cáo lợi nhuận: chỉ tính hóa đơn status='paid', theo kỳ due_date hàng tháng,
+// lọc thêm theo tuyến xe (PaymentPlan.route_id) nếu có truyền routeId.
+router.get('/reports/revenue', ...auth, async (req, res, next) => {
+  try {
+    const { startDate, endDate, routeId } = req.query;
+    res.json({ success: true, data: await adminService.getRevenueReport({ startDate, endDate, routeId }) });
+  } catch (e) { next(e); }
+});
+
 // ── NOTIFICATIONS ──────────────────────────────────────────
 router.post('/notifications/broadcast', ...auth, async (req, res, next) => {
   try { res.json({ success: true, data: await adminService.broadcastNotification(req.body) }); }
@@ -133,21 +190,6 @@ router.patch('/notifications/read-all', ...managerAuth, async (req, res, next) =
   try { res.json({ success: true, data: await adminService.markAllNotificationsRead(req.user.id, req.user.role) }); }
   catch (e) { next(e); }
 });
-
-// ── ĐƠN XIN VẮNG HỌC (tab riêng, không gộp chung thông báo khác) ──
-router.get('/absent-requests', ...managerAuth, async (req, res, next) => {
-  try { res.json({ success: true, data: await absentRequestService.getAbsentRequests(req.query) }); }
-  catch (e) { next(e); }
-});
-router.get('/absent-requests/:id', ...managerAuth, async (req, res, next) => {
-  try { res.json({ success: true, data: await absentRequestService.getAbsentRequestById(req.params.id) }); }
-  catch (e) { next(e); }
-});
-// ============================================================
-// THÊM CÁC ROUTE SAU VÀO admin.route.js
-// (chèn ngay dưới route cũ `router.post('/notifications/broadcast', ...)`,
-//  hoặc thay thế hẳn route đó nếu bạn không cần giữ kiểu gửi "broadcast tất cả" cũ nữa)
-// ============================================================
 
 // Cho phép cả Admin lẫn Manager gửi thông báo (giống pattern managerAuth ở /vehicles)
 router.post('/notifications/send', ...managerAuth, async (req, res, next) => {
