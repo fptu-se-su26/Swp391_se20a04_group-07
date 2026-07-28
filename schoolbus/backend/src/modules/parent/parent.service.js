@@ -5,8 +5,16 @@ const {
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require('sequelize');
 const { getIO } = require('../../utils/socketRegistry');
+const { buildVietQrUrl } = require('../../utils/qrcode.util');
+const { geocodeAddress, clearGeocodeCache } = require('../../utils/geocode.util');
 
 const PARENT_PREFIX = 'parent_';
+
+// Ngày hôm nay theo UTC+7 (Vietnam), dạng YYYY-MM-DD — dùng để so sánh với due_date (DATEONLY)
+const todayVN = () => {
+  const vnTime = new Date(Date.now() + 7 * 60 * 60 * 1000);
+  return vnTime.toISOString().split('T')[0];
+};
 
 class ParentService {
 
@@ -74,7 +82,7 @@ class ParentService {
       where: { scheduled_date: today, status: 'in_progress' },
       include: [
         { model: TripAttendance, where: { student_id: studentId }, required: true },
-        { model: Route, include: [{ model: RouteStop, separate: true, order: [['stop_order', 'ASC']] }] },
+        { model: Route },
         { model: UserDriver, as: 'driver', attributes: ['full_name', 'phone'] }
       ]
     });
@@ -158,8 +166,8 @@ class ParentService {
       : 'Một học sinh';
 
     const title = '📋 Đơn xin vắng học mới';
-    const body  = `${studentLabel} xin nghỉ ngày ${absentDate}${reason ? ': ' + reason : ''}`;
-    const data  = JSON.stringify({ absentRequestId: request.id, studentId, absentDate });
+    const body = `${studentLabel} xin nghỉ ngày ${absentDate}${reason ? ': ' + reason : ''}`;
+    const data = JSON.stringify({ absentRequestId: request.id, studentId, absentDate });
 
     const [managers, admins] = await Promise.all([
       UserManager.findAll({ where: { is_active: true }, attributes: ['id'] }),
@@ -198,22 +206,41 @@ class ParentService {
     });
   }
 
+  // ── Hóa đơn ────────────────────────────────────────────────
+  // Trả về kèm: display_status ('overdue' tính ảo cho hóa đơn pending quá hạn)
+  // và qr_url (ảnh QR VietQR sinh trực tiếp từ payment_code, không lưu DB).
   async getInvoices(parentId) {
     const studentId = this._studentIdFromParentId(parentId);
-    return Invoice.findAll({
+    const invoices = await Invoice.findAll({
       // Invoice.parent_id is populated with the student's own id, not "parent_<uuid>"
       // (see managerRouter.post('/payments/generate-invoices') in other.routes.js).
       where: { parent_id: studentId },
       include: [{ model: Student, as: 'student', attributes: ['full_name'] }],
       order: [['created_at', 'DESC']]
     });
+
+    const today = todayVN();
+    return invoices.map(inv => {
+      const json = inv.toJSON();
+      const displayStatus = (json.status === 'pending' && String(json.due_date) < today)
+        ? 'overdue' : json.status;
+      return {
+        ...json,
+        display_status: displayStatus,
+        // checkout_url payOS là nguồn chính (thanh toán tự động xác nhận qua webhook).
+        // qr_url tĩnh chỉ dùng dự phòng nếu vì lý do gì đó chưa tạo được link payOS.
+        qr_url: json.checkout_url ? null : (json.payment_code ? buildVietQrUrl(json.amount, json.payment_code) : null),
+      };
+    });
   }
 
-  async payInvoice(invoiceId, parentId, paymentMethod) {
+  // GIỮ LẠI để tương thích ngược — không còn dùng trong luồng chính (payOS tự xác nhận qua
+  // webhook), nhưng có thể hữu ích làm phương án dự phòng thủ công nếu webhook gặp sự cố.
+  async payInvoice(invoiceId, parentId) {
     const studentId = this._studentIdFromParentId(parentId);
     const inv = await Invoice.findOne({ where: { id: invoiceId, parent_id: studentId, status: 'pending' } });
-    if (!inv) throw Object.assign(new Error('Hóa đơn không tồn tại hoặc đã thanh toán'), { status: 404 });
-    return inv.update({ status: 'paid', paid_at: new Date(), payment_method: paymentMethod, transaction_id: 'TXN-' + Date.now() });
+    if (!inv) throw Object.assign(new Error('Hóa đơn không tồn tại hoặc đã được xử lý'), { status: 404 });
+    return inv.update({ status: 'awaiting_confirmation' });
   }
 
   async getNotifications(userId, page = 1, limit = 20) {
@@ -239,8 +266,89 @@ class ParentService {
 
   async createFeedback(parentId, tripId, targetType, rating, comment) {
     const studentId = this._studentIdFromParentId(parentId);
-    // Feedback.from_user is a UUID column — same rule as parent_id elsewhere.
     return Feedback.create({ id: uuidv4(), trip_id: tripId, from_user: studentId, from_type: 'parent', target_type: targetType, rating, comment });
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // Vị TRÍ NHÀ HỌC SINH — Parent tự cập nhật
+  // ══════════════════════════════════════════════════════════════
+
+  /**
+   * Lấy thông tin vị trí hiện tại của học sinh.
+   * Parent chỉ được xem con của mình.
+   */
+  async getChildLocation(parentId, childId) {
+    const ownStudentId = this._checkParent(parentId, childId);
+    const student = await Student.findByPk(ownStudentId, {
+      attributes: ['id', 'full_name', 'home_address', 'home_lat', 'home_lng'],
+    });
+    if (!student) throw Object.assign(new Error('Không tìm thấy học sinh'), { status: 404 });
+    return {
+      id:           student.id,
+      full_name:    student.full_name,
+      home_address: student.home_address,
+      home_lat:     student.home_lat     ? parseFloat(student.home_lat)  : null,
+      home_lng:     student.home_lng     ? parseFloat(student.home_lng)  : null,
+      hasConfirmed: !!(student.home_lat && student.home_lng),
+    };
+  }
+
+  /**
+   * Cập nhật vị trí nhà học sinh.
+   * Ưu tiên: lat/lng được cung cấp trực tiếp (Parent kéo marker)
+   *           nếu không có thì geocode từ home_address mới.
+   *
+   * @param {string} parentId
+   * @param {string} childId
+   * @param {{ home_address?: string, home_lat?: number, home_lng?: number }} body
+   */
+  async updateChildLocation(parentId, childId, body) {
+    const ownStudentId = this._checkParent(parentId, childId);
+    const student = await Student.findByPk(ownStudentId);
+    if (!student) throw Object.assign(new Error('Không tìm thấy học sinh'), { status: 404 });
+
+    const { home_address, home_lat, home_lng } = body;
+    const updates = {};
+
+    // ── Trường hợp 1: Parent cung cấp toạ độ trực tiếp (kéo marker) ──
+    if (home_lat != null && home_lng != null) {
+      const lat = parseFloat(home_lat);
+      const lng = parseFloat(home_lng);
+      if (isNaN(lat) || isNaN(lng)) throw Object.assign(new Error('Toạ độ không hợp lệ'), { status: 400 });
+      updates.home_lat = lat;
+      updates.home_lng = lng;
+      if (home_address) {
+        updates.home_address = home_address;
+        clearGeocodeCache(home_address);
+      }
+    }
+    // ── Trường hợp 2: Chỉ có địa chỉ mới (chưa có toạ độ) — geocode lại ──
+    else if (home_address && home_address !== student.home_address) {
+      clearGeocodeCache(student.home_address);
+      updates.home_address = home_address;
+
+      const geo = await geocodeAddress(home_address);
+      if (geo) {
+        updates.home_lat = geo.lat;
+        updates.home_lng = geo.lng;
+      } else {
+        // Geocoding thất bại — xóa toạ độ cũ (để Driver biết cần xác nhận)
+        updates.home_lat = null;
+        updates.home_lng = null;
+      }
+    } else {
+      throw Object.assign(new Error('Không có dữ liệu nào để cập nhật'), { status: 400 });
+    }
+
+    await student.update(updates);
+
+    return {
+      id:           student.id,
+      home_address: student.home_address,
+      home_lat:     updates.home_lat  ?? parseFloat(student.home_lat)  ?? null,
+      home_lng:     updates.home_lng  ?? parseFloat(student.home_lng)  ?? null,
+      hasConfirmed: !!(updates.home_lat && updates.home_lng),
+    };
   }
 }
 

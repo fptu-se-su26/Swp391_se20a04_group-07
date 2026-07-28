@@ -69,4 +69,32 @@ router.post('/feedback', ...auth, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// ── Vị trí nhà học sinh ──────────────────────────────────────────────────────
+
+/**
+ * GET /api/v1/parent/children/:childId/location
+ * Lấy thông tin vị trí hiện tại (home_address, home_lat, home_lng) của con.
+ */
+router.get('/children/:childId/location', ...auth, async (req, res, next) => {
+  try {
+    const data = await parentService.getChildLocation(req.user.id, req.params.childId);
+    res.json({ success: true, data });
+  } catch (e) { next(e); }
+});
+
+/**
+ * PATCH /api/v1/parent/children/:childId/location
+ * Cập nhật vị trí nhà học sinh.
+ * Body: { home_address?, home_lat?, home_lng? }
+ *   - Nếu có home_lat + home_lng: lưu trực tiếp (ưu tiên tuyệt đối - Parent kéo marker)
+ *   - Nếu chỉ có home_address: geocode lại
+ */
+router.patch('/children/:childId/location', ...auth, async (req, res, next) => {
+  try {
+    const data = await parentService.updateChildLocation(req.user.id, req.params.childId, req.body);
+    res.json({ success: true, data });
+  } catch (e) { next(e); }
+});
+
 module.exports = router;
+
