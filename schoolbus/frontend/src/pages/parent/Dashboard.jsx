@@ -34,6 +34,7 @@ export default function ParentDashboard() {
     } catch {} finally { setLoading(false); }
   };
 
+
   useEffect(() => { fetchChildren(); }, []);
 
   const handleLink = async () => {
@@ -81,6 +82,7 @@ export default function ParentDashboard() {
                     <p className="text-xs text-gray-500">{child.email}</p>
                   </div>
                 </div>
+                
 
                 {/* Bus status */}
                 {activeTrip ? (
