@@ -27,6 +27,7 @@ export default function ParentAttendance() {
       .finally(() => setLoading(false));
   }, [selected, month, year]);
 
+
   const stats = {
     total:    records.length,
     boarded:  records.filter(r => r.status === 'boarded').length,
@@ -34,6 +35,7 @@ export default function ParentAttendance() {
     dropped:  records.filter(r => r.status === 'dropped_off').length,
   };
 
+  
   return (
     <div>
       <PageHeader title="Lịch sử điểm danh" />
