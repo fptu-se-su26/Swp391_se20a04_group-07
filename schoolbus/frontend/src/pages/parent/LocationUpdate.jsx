@@ -16,6 +16,7 @@ function isInDaNang(lat, lng) {
       && lng >= DN_BOUNDS.lngMin && lng <= DN_BOUNDS.lngMax;
 }
 
+
 export default function LocationUpdate() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -27,6 +28,7 @@ export default function LocationUpdate() {
     latitude: DEFAULT_CENTER.latitude,
     zoom: 12,
   });
+  
   
   // Marker state
   const [markerPos, setMarkerPos] = useState(null);
