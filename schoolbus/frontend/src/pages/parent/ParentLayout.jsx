@@ -2,6 +2,7 @@ import React from 'react';
 import { DashboardLayout } from '../../components/common';
 
 const links = [
+
   { to: '/parent',               label: 'Tổng quan',    icon: '🏠', end: true },
   { to: '/parent/tracking',      label: 'Theo dõi xe',  icon: '🗺️' },
   { to: '/parent/attendance',    label: 'Điểm danh',    icon: '📋' },
@@ -11,6 +12,7 @@ const links = [
   { to: '/parent/notifications', label: 'Thông báo',    icon: '🔔' },
   { to: '/parent/download',      label: 'Tải ứng dụng', icon: '📲' },
 ];
+
 
 export default function ParentLayout() {
   return <DashboardLayout title="Phụ Huynh" links={links} roleColor="bg-yellow-800" />;
