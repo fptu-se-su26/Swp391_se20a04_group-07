@@ -31,6 +31,7 @@ export default function Notifications() {
       setTotal(r.data.data.total);
     } catch {} finally { setLoading(false); }
   };
+
   useEffect(() => { fetch(1); }, []);
 
   const markRead = async (id, isRead) => {
@@ -41,6 +42,7 @@ export default function Notifications() {
     } catch {}
   };
 
+  
   const markAllRead = async () => {
     try {
       await parentApi.markAllRead();
