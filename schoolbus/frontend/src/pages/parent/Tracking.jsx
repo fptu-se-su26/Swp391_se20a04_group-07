@@ -17,14 +17,17 @@ const isValid = (pos) =>
   typeof pos[1] === 'number' && !isNaN(pos[1]) && pos[1] !== 0;
 
 function makeCircle([lat, lng], r = 40, pts = 32) {
+
   const dx = r / (111320 * Math.cos((lat * Math.PI) / 180)), dy = r / 110540;
   const coords = Array.from({ length: pts }, (_, i) => {
     const theta = (i / pts) * 2 * Math.PI;
     return [lng + dx * Math.cos(theta), lat + dy * Math.sin(theta)];
   });
+
   coords.push(coords[0]);
   return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
 }
+
 
 /* ── Phase config ─────────────────────────────────────────────────────────── */
 const PHASES = {
@@ -33,6 +36,7 @@ const PHASES = {
   arrived:        { label: 'Đã đến trường',      icon: '🏫', color: '#22c55e', bgClass: 'bg-green-500', textClass: 'text-green-700', lightClass: 'bg-green-50 border-green-200' },
   absent:         { label: 'Vắng mặt hôm nay',  icon: '❌', color: '#ef4444', bgClass: 'bg-red-500',   textClass: 'text-red-700',   lightClass: 'bg-red-50 border-red-200'     },
 };
+
 
 function getPhase(tripData, childAtt) {
   if (!tripData) return null;
@@ -65,6 +69,7 @@ function BusMarker({ phase }) {
 
 /* ── Child status card ────────────────────────────────────────────────────── */
 function ChildStatusCard({ childAtt, selected }) {
+
   if (!childAtt) return null;
   const { status } = childAtt;
   const config = {
@@ -73,6 +78,7 @@ function ChildStatusCard({ childAtt, selected }) {
     absent:      { icon: '❌', label: `${selected?.full_name} vắng mặt hôm nay`,      cls: 'bg-red-50 border-red-200 text-red-800'       },
     waiting:     { icon: '⏳', label: `Đang chờ xe đến đón ${selected?.full_name}`,   cls: 'bg-amber-50 border-amber-200 text-amber-800' },
   };
+
   const c = config[status] || config.waiting;
   return (
     <div className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${c.cls}`}>
@@ -80,6 +86,7 @@ function ChildStatusCard({ childAtt, selected }) {
       <p className="font-semibold text-sm leading-snug">{c.label}</p>
     </div>
   );
+  
 }
 
 /* ── Stats row ────────────────────────────────────────────────────────────── */
