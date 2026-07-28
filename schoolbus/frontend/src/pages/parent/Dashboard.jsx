@@ -20,10 +20,15 @@ export default function ParentDashboard() {
       // Fetch bus status for each child
       const statuses = {};
       await Promise.all(data.data.map(async (c) => {
+
+        
         try {
           const r = await parentApi.getBusStatus(c.id);
           statuses[c.id] = r.data.data;
         } catch {}
+
+
+
       }));
       setBusStatus(statuses);
     } catch {} finally { setLoading(false); }
